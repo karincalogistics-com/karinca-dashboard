@@ -1,0 +1,30 @@
+# Test dosyaları
+test.html
+test_data.csv
+debug_dashboard.html
+emergency_test.html
+simple_test.csv
+test_dashboard.html
+simple_test_page.html
+shift_schedule.csv
+firebase-init.json
+Rapor https.txt
+
+# Spec dosyaları
+.kiro/
+
+# Node modules (eğer gelecekte kullanılırsa)
+node_modules/
+
+# Log dosyaları
+*.log
+
+# OS dosyaları
+.DS_Store
+Thumbs.db
+
+# IDE dosyaları
+.vscode/
+.idea/
+*.swp
+*.swo

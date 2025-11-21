@@ -1,0 +1,2451 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karınca - Personel Performans Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="karinca-logo.svg">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS CDN for Excel reading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- Firebase Auth System -->
+    <script src="js/firebaseAuth.js"></script>
+
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-logo">
+                    <img src="karinca-logo.svg" alt="Karınca Logo" style="width: 80px; height: 80px;">
+                    <h1>Performans Dashboard</h1>
+                    <p>Lütfen giriş yapın</p>
+                </div>
+            </div>
+            <div class="login-form-container">
+                <div class="form-group">
+                    <label for="login-email-input">Email Adresi</label>
+                    <input type="email" id="login-email-input" class="form-input" placeholder="ornek@email.com" />
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary btn-login" onclick="performLogin()">
+                        🔑 Giriş Yap
+                    </button>
+                </div>
+                <div class="login-info">
+                    <p><strong>ℹ️ Bilgi:</strong> Sadece yetkili email adresleri erişebilir.</p>
+                    <p><strong>🔑 Anahtar Kullanıcı:</strong> huseyin.kilic@karincalogistics.com</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="main-header" style="display: none;">
+        <div class="header-content">
+            <h1 class="header-title">
+                <img src="karinca-logo.svg" alt="Karınca Logo" class="header-logo">
+                Personel Performans Dashboard
+            </h1>
+            <div class="header-actions">
+                <button id="refresh-btn" class="btn btn-primary" onclick="refreshData()" title="Verileri Yenile">
+                    <span class="btn-icon">🔄</span>
+                    Yenile
+                </button>
+                <button id="debug-btn" class="btn btn-secondary" onclick="toggleDebug()">
+                    <span class="btn-icon">🔍</span>
+                    Debug
+                </button>
+                <div class="settings-container">
+                    <button id="settings-btn" class="btn btn-settings" onclick="toggleSettings()" title="Ayarlar">
+                        <span class="settings-icon">⚙️</span>
+                    </button>
+                    <div id="settings-menu" class="dropdown-menu">
+                        <div class="menu-section">
+                            <div class="menu-section-title">🎨 Tema</div>
+                            <div class="menu-item" onclick="setTheme('light')">
+                                <span class="menu-item-icon">☀️</span>
+                                <span class="menu-item-text">Aydınlık</span>
+                                <span class="theme-indicator" id="light-indicator"></span>
+                            </div>
+                            <div class="menu-item" onclick="setTheme('dark')">
+                                <span class="menu-item-icon">🌙</span>
+                                <span class="menu-item-text">Karanlık</span>
+                                <span class="theme-indicator" id="dark-indicator"></span>
+                            </div>
+                            <div class="menu-item" onclick="setTheme('auto')">
+                                <span class="menu-item-icon">🔄</span>
+                                <span class="menu-item-text">Otomatik</span>
+                                <span class="theme-indicator" id="auto-indicator"></span>
+                            </div>
+                        </div>
+                        <div class="menu-section" id="auth-section">
+                            <div class="menu-section-title">🔐 Yetkilendirme</div>
+                            <div class="menu-item" onclick="showAdminPanel()" id="admin-menu-item" style="display: none;">
+                                <span class="menu-item-icon">👑</span>
+                                <span class="menu-item-text">Yetki Paneli</span>
+                            </div>
+                            <div class="menu-item" onclick="showUserInfo()" id="user-info-item">
+                                <span class="menu-item-icon">👤</span>
+                                <span class="menu-item-text">Kullanıcı Bilgisi</span>
+                            </div>
+                            <div class="menu-item" onclick="logout()" id="logout-menu-item">
+                                <span class="menu-item-icon">🚪</span>
+                                <span class="menu-item-text">Çıkış Yap</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="menu-container">
+                    <button id="menu-btn" class="btn btn-menu" onclick="toggleMenu()" title="Menü">
+                        <span class="menu-icon">
+                            <span class="menu-line"></span>
+                            <span class="menu-line"></span>
+                            <span class="menu-line"></span>
+                        </span>
+                    </button>
+                    <div id="dropdown-menu" class="dropdown-menu">
+                        <div class="menu-item" onclick="selectFileCurrentTab()">
+                            <span class="menu-item-icon">📂</span>
+                            <span class="menu-item-text">Dosya Aç</span>
+                        </div>
+                        <div class="menu-divider"></div>
+                        <div class="menu-item" onclick="openNewTab()">
+                            <span class="menu-item-icon">📄</span>
+                            <span class="menu-item-text">Yeni Dosya Seç</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Container -->
+    <main class="dashboard" id="main-dashboard" style="display: none;">
+        <!-- Upload Section -->
+        <section class="upload-section" id="upload-section">
+            <div class="upload-container">
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-icon">📁</div>
+                    <h3>Excel Dosyasını Yükleyin</h3>
+                    <p>Personel verilerinizi içeren Excel dosyasını sürükleyip bırakın veya seçin</p>
+                    <div class="upload-hint">
+                        <small>💡 Dosyayı güncelledikten sonra buraya tekrar sürükleyebilirsiniz</small>
+                    </div>
+                    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+                        Dosya Seç
+                    </button>
+                </div>
+                
+                <div class="upload-progress" id="upload-progress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <p class="progress-text" id="progress-text">Dosya işleniyor...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content" id="dashboard-content" style="display: none;">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="header-info">
+                    <button class="info-btn" onclick="showPerformanceInfo()" title="Performans Hesaplama Bilgisi">
+                        <span class="info-icon">ℹ️</span>
+                        <span class="info-text">Performans Hesaplama</span>
+                    </button>
+                </div>
+                <div class="header-content-center">
+                    <h1>Performans Dashboard</h1>
+                    <p class="dashboard-subtitle">KPI kartlarına tıklayarak detaylı bilgileri görüntüleyebilirsiniz</p>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <section class="kpi-section">
+                <div class="kpi-cards">
+                    <div class="kpi-card clickable" onclick="showPersonnelList()">
+                        <div class="kpi-icon">👥</div>
+                        <div class="kpi-content">
+                            <h3>Toplam Personel</h3>
+                            <span class="kpi-value" id="total-personnel">0</span>
+                        </div>
+                        <div class="kpi-arrow">→</div>
+                    </div>
+                    <div class="kpi-card clickable" onclick="showQuantityDetails()">
+                        <div class="kpi-icon">
+                            <img src="karinca-logo.svg" alt="Karınca Logo" style="width: 2.8rem; height: 2.8rem;">
+                        </div>
+                        <div class="kpi-content">
+                            <h3>Toplam Miktar</h3>
+                            <span class="kpi-value" id="total-quantity">0</span>
+                        </div>
+                        <div class="kpi-arrow">→</div>
+                    </div>
+                    <div class="kpi-card clickable" onclick="showWarehouseDetails()">
+                        <div class="kpi-icon">📋</div>
+                        <div class="kpi-content">
+                            <h3>Aktif Proje</h3>
+                            <span class="kpi-value" id="active-warehouses">0</span>
+                        </div>
+                        <div class="kpi-arrow">→</div>
+                    </div>
+                    <div class="kpi-card clickable" onclick="showTransactionDetails()">
+                        <div class="kpi-icon">📦</div>
+                        <div class="kpi-content">
+                            <h3>Toplam İşlem</h3>
+                            <span class="kpi-value" id="total-transactions">0</span>
+                        </div>
+                        <div class="kpi-arrow">→</div>
+                    </div>
+                    <div class="kpi-card clickable" onclick="showWorkingHours()">
+                        <div class="kpi-icon">⏰</div>
+                        <div class="kpi-content">
+                            <h3>Çalışma Saatleri</h3>
+                            <span class="kpi-value" id="working-hours">0h</span>
+                        </div>
+                        <div class="kpi-arrow">→</div>
+                    </div>
+                </div>
+            </section>
+
+
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+        // Global değişkenler
+        let appData = null;
+        let shiftData = null;
+        let currentFileName = null;
+        let currentFileContent = null;
+        let currentFileLastModified = null;
+        
+        // Yetkilendirme değişkenleri
+        const ADMIN_EMAIL = 'huseyin.kilic@karincalogistics.com';
+        let currentUserEmail = null;
+        let isAuthenticated = false;
+        let isAdmin = false;
+        
+        // Mola saatleri verisi
+        const defaultShiftSchedule = {
+            'Fiba': {
+                vardiyaBaslangic: '08:00',
+                ilkMola: '09:45',
+                yemekMolasi: '11:45', 
+                ikinciMola: '15:15',
+                vardiyaBitis: '17:30',
+                mesaiBaslangic: '17:30',
+                mesaiYemek: '17:30',
+                mesaiMola: '19:45',
+                mesaiBitis: '21:00'
+            },
+            'Derimod': {
+                vardiyaBaslangic: '08:00',
+                ilkMola: '10:15',
+                yemekMolasi: '13:00',
+                ikinciMola: '15:30', 
+                vardiyaBitis: '17:30',
+                mesaiBaslangic: '17:30',
+                mesaiYemek: '17:30',
+                mesaiMola: '19:45',
+                mesaiBitis: '21:00'
+            },
+            'Panço': {
+                vardiyaBaslangic: '08:00',
+                ilkMola: '10:30',
+                yemekMolasi: '12:45',
+                ikinciMola: '15:30',
+                vardiyaBitis: '17:30', 
+                mesaiBaslangic: '17:30',
+                mesaiYemek: '17:30',
+                mesaiMola: '19:45',
+                mesaiBitis: '21:00'
+            }
+        };
+
+        // Bu fonksiyon zaten yukarıda güncellendi, kaldırılabilir
+
+        // File upload başlatma
+        function initializeFileUpload() {
+            const fileInput = document.getElementById('file-input');
+            const uploadArea = document.getElementById('upload-area');
+            
+            // File input change event
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    processFile(file);
+                }
+            });
+            
+            // Drag & drop events
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    processFile(files[0]);
+                }
+            });
+        }
+
+        // Dosya işleme
+        async function processFile(file) {
+            try {
+                console.log('Dosya işleniyor:', file.name);
+                showLoading();
+                
+                // Dosya boyutu kontrolü
+                if (file.size === 0) {
+                    throw new Error('Dosya boş görünüyor. Lütfen dosyayı kaydedin ve tekrar deneyin.');
+                }
+                
+                // Dosya bilgilerini sakla
+                currentFileName = file.name;
+                currentFileLastModified = file.lastModified;
+                
+                // Dosya okuma
+                const data = await readFile(file);
+                console.log('Dosya okundu:', data.length, 'satır');
+                
+                // Dosya içeriğini sakla (yedek için)
+                currentFileContent = data;
+                
+                // Veri işleme
+                const processedData = processData(data);
+                console.log('Veri işlendi:', processedData);
+                
+                // Dashboard güncelleme
+                updateDashboard(processedData);
+                
+                hideLoading();
+                
+            } catch (error) {
+                console.error('Hata:', error);
+                hideLoading();
+                throw error; // Hata'yı yukarı fırlat (alert gösterme)
+            }
+        }
+
+        // Dosya okuma
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                // Dosya kontrolü
+                if (!file) {
+                    reject(new Error('Dosya seçilmedi'));
+                    return;
+                }
+                
+                if (file.size === 0) {
+                    reject(new Error('Dosya boş. Lütfen Excel dosyasını kaydedin ve kapatın.'));
+                    return;
+                }
+                
+                const reader = new FileReader();
+                
+                // Timeout ekle (5 saniye)
+                const timeout = setTimeout(() => {
+                    reader.abort();
+                    reject(new Error('Dosya okuma zaman aşımı. Excel dosyasını kapatıp tekrar deneyin.'));
+                }, 5000);
+                
+                reader.onload = function(e) {
+                    clearTimeout(timeout);
+                    try {
+                        if (file.name.toLowerCase().endsWith('.csv')) {
+                            // CSV okuma
+                            const text = e.target.result;
+                            if (!text || text.trim() === '') {
+                                reject(new Error('CSV dosyası boş'));
+                                return;
+                            }
+                            const lines = text.split('\n').filter(line => line.trim());
+                            const data = lines.map(line => line.split(',').map(cell => cell.trim()));
+                            resolve(data);
+                        } else {
+                            // Excel okuma
+                            const data = new Uint8Array(e.target.result);
+                            if (data.length === 0) {
+                                reject(new Error('Excel dosyası boş veya bozuk'));
+                                return;
+                            }
+                            
+                            const workbook = XLSX.read(data, { 
+                                type: 'array',
+                                cellDates: false, // Tarihleri sayı olarak al
+                                cellNF: false,
+                                cellText: false
+                            });
+                            
+                            if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+                                reject(new Error('Excel dosyasında sayfa bulunamadı'));
+                                return;
+                            }
+                            
+                            const sheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[sheetName];
+                            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                            
+                            if (!jsonData || jsonData.length === 0) {
+                                reject(new Error('Excel dosyasında veri bulunamadı'));
+                                return;
+                            }
+                            
+                            resolve(jsonData);
+                        }
+                    } catch (error) {
+                        clearTimeout(timeout);
+                        console.error('Dosya parse hatası:', error);
+                        reject(new Error('Dosya formatı hatalı: ' + error.message));
+                    }
+                };
+                
+                reader.onerror = function(e) {
+                    clearTimeout(timeout);
+                    console.error('FileReader hatası:', e);
+                    reject(new Error('Dosya okuma hatası. Excel dosyasını kapatıp tekrar deneyin.'));
+                };
+                
+                reader.onabort = function() {
+                    clearTimeout(timeout);
+                    reject(new Error('Dosya okuma iptal edildi'));
+                };
+                
+                // Dosya okumaya başla
+                try {
+                    if (file.name.toLowerCase().endsWith('.csv')) {
+                        reader.readAsText(file, 'UTF-8');
+                    } else {
+                        reader.readAsArrayBuffer(file);
+                    }
+                } catch (error) {
+                    clearTimeout(timeout);
+                    reject(new Error('Dosya okuma başlatılamadı: ' + error.message));
+                }
+            });
+        }
+
+        // Veri işleme
+        function processData(rawData) {
+            if (!rawData || rawData.length < 2) {
+                throw new Error('Geçersiz veri');
+            }
+            
+            const headers = rawData[0];
+            const rows = rawData.slice(1);
+            
+            console.log('Headers:', headers);
+            console.log('Rows:', rows.length);
+            
+            // Kolon indekslerini bul
+            const personelIndex = findColumnIndex(headers, ['personel', 'personnel', 'ad', 'name']);
+            const miktarIndex = findColumnIndex(headers, ['miktar', 'quantity', 'amount']);
+            const projeIndex = findColumnIndex(headers, ['proje', 'project', 'depo', 'warehouse']);
+            const tarihIndex = findColumnIndex(headers, ['tarih', 'date', 'işlem tarihi']);
+            const saatIndex = findColumnIndex(headers, ['saat', 'time', 'işlem saati']);
+            const hareketIndex = findColumnIndex(headers, ['hareket', 'movement', 'hareket tipi']);
+            const skuIndex = findColumnIndex(headers, ['sku', 'sku kodu', 'sku_kodu']);
+            
+            console.log('Kolon indeksleri:', { personelIndex, miktarIndex, projeIndex, tarihIndex, saatIndex, hareketIndex, skuIndex });
+            
+            // Personel verilerini işle
+            const personnelMap = {};
+            const warehouseSet = new Set();
+            const movementTypeSet = new Set();
+            let totalQuantity = 0;
+            
+            rows.forEach((row, index) => {
+                if (row.length === 0) return;
+                
+                const personel = personelIndex >= 0 ? row[personelIndex] : '';
+                const miktar = miktarIndex >= 0 ? parseFloat(row[miktarIndex]) || 0 : 0;
+                const proje = projeIndex >= 0 ? row[projeIndex] : '';
+                const tarih = tarihIndex >= 0 ? row[tarihIndex] : '';
+                const saat = saatIndex >= 0 ? row[saatIndex] : '';
+                const hareket = hareketIndex >= 0 ? row[hareketIndex] : '';
+                const sku = skuIndex >= 0 ? row[skuIndex] : '';
+                
+                if (personel) {
+                    if (!personnelMap[personel]) {
+                        personnelMap[personel] = {
+                            name: personel,
+                            totalTransactions: 0,
+                            totalQuantity: 0,
+                            transactions: [],
+                            warehouses: new Set(),
+                            movementTypes: new Set(),
+                            performance: 0
+                        };
+                    }
+                    
+                    // İşlem detayını ekle
+                    const transaction = {
+                        id: index,
+                        date: formatDate(tarih),
+                        time: formatTime(saat),
+                        warehouse: proje,
+                        movementType: hareket,
+                        sku: sku,
+                        quantity: miktar
+                    };
+                    
+                    personnelMap[personel].transactions.push(transaction);
+                    personnelMap[personel].totalTransactions++;
+                    personnelMap[personel].totalQuantity += miktar;
+                    
+                    // Debug: İşlem sayısını logla
+                    if (personnelMap[personel].totalTransactions % 100 === 0) {
+                        console.log(`📊 ${personel}: ${personnelMap[personel].totalTransactions} işlem`);
+                    }
+                    
+                    if (proje) personnelMap[personel].warehouses.add(proje);
+                    if (hareket) personnelMap[personel].movementTypes.add(hareket);
+                }
+                
+                if (proje) warehouseSet.add(proje);
+                if (hareket) movementTypeSet.add(hareket);
+                totalQuantity += miktar;
+            });
+            
+            // Personel performansını hesapla
+            const personnel = Object.values(personnelMap).map(person => {
+                person.warehouses = Array.from(person.warehouses);
+                person.movementTypes = Array.from(person.movementTypes);
+                person.performance = Math.min(100, Math.round((person.totalQuantity / 100) + (person.totalTransactions * 5)));
+                
+                // Gerçek çalışma saatleri hesapla (Excel'deki işlem saatlerinden)
+                const workingHours = calculateRealWorkingHours(person);
+                person.workingHours = workingHours;
+                
+                return person;
+            });
+            
+            const warehouses = Array.from(warehouseSet);
+            const movementTypes = Array.from(movementTypeSet);
+            
+            return {
+                personnel: personnel,
+                warehouses: warehouses,
+                movementTypes: movementTypes,
+                totalTransactions: rows.length,
+                totalQuantity: totalQuantity,
+                rawData: rows,
+                headers: headers
+            };
+        }
+
+        // Kolon indeksi bulma
+        function findColumnIndex(headers, possibleNames) {
+            for (let i = 0; i < headers.length; i++) {
+                const header = headers[i].toLowerCase().trim();
+                for (let name of possibleNames) {
+                    if (header.includes(name.toLowerCase())) {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        // Dashboard güncelleme
+        function updateDashboard(data) {
+            appData = data;
+            
+            // Upload section gizle
+            document.getElementById('upload-section').style.display = 'none';
+            // Dashboard göster
+            document.getElementById('dashboard-content').style.display = 'block';
+            
+            // KPI'ları güncelle
+            document.getElementById('total-personnel').textContent = data.personnel.length;
+            document.getElementById('total-transactions').textContent = data.totalTransactions;
+            document.getElementById('total-quantity').textContent = data.totalQuantity.toLocaleString();
+            document.getElementById('active-warehouses').textContent = data.warehouses.length;
+            
+            // Toplam net çalışma saati hesapla
+            const totalNetMinutes = data.personnel.reduce((sum, person) => sum + (person.workingHours?.netHours || 0), 0);
+            document.getElementById('working-hours').textContent = minutesToTime(totalNetMinutes);
+            
+            console.log('✅ Dashboard güncellendi:', data.personnel.length, 'personel yüklendi');
+        }
+        
+        // Tarih formatla
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            
+            // String'e çevir
+            const dateString = String(dateStr).trim();
+            if (!dateString || dateString === '') return '-';
+            
+            // Eğer Excel sayısal tarih formatıysa (45966 gibi), bugünün tarihini göster
+            if (!isNaN(dateString) && dateString.length >= 4) {
+                const excelDate = parseFloat(dateString);
+                if (excelDate > 1000 && excelDate < 100000) {
+                    // Bugünün tarihini döndür
+                    const today = new Date();
+                    const day = String(today.getDate()).padStart(2, '0');
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const year = today.getFullYear();
+                    return `${day}.${month}.${year}`;
+                }
+            }
+            
+            // Türkçe tarih formatını kontrol et (01.12.2024)
+            if (dateString.includes('.')) {
+                const parts = dateString.split('.');
+                if (parts.length === 3) {
+                    const day = String(parts[0]).padStart(2, '0');
+                    const month = String(parts[1]).padStart(2, '0');
+                    const year = String(parts[2]);
+                    return `${day}.${month}.${year}`;
+                }
+            }
+            
+            // ISO tarih formatını kontrol et (2024-12-01)
+            if (dateString.includes('-') && dateString.length >= 8) {
+                const parts = dateString.split('-');
+                if (parts.length === 3) {
+                    const year = parts[0];
+                    const month = String(parts[1]).padStart(2, '0');
+                    const day = String(parts[2]).padStart(2, '0');
+                    return `${day}.${month}.${year}`;
+                }
+            }
+            
+            // Eğer tarih formatı tanınmıyorsa, JavaScript Date ile parse etmeyi dene
+            try {
+                const parsedDate = new Date(dateString);
+                if (!isNaN(parsedDate.getTime()) && parsedDate.getFullYear() > 1900 && parsedDate.getFullYear() < 2100) {
+                    const day = String(parsedDate.getDate()).padStart(2, '0');
+                    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+                    const year = parsedDate.getFullYear();
+                    return `${day}.${month}.${year}`;
+                }
+            } catch (e) {
+                // Parse edilemezse orijinal değeri döndür
+            }
+            
+            return dateString;
+        }
+        
+        // Saat formatla
+        function formatTime(timeStr) {
+            if (!timeStr) return '-';
+            
+            // Excel decimal formatını kontrol et (0.375 = 09:00)
+            if (typeof timeStr === 'number' || (!isNaN(parseFloat(timeStr)) && String(timeStr).includes('.'))) {
+                const decimal = parseFloat(timeStr);
+                const totalMinutes = Math.round(decimal * 24 * 60);
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            }
+            
+            // String'e çevir
+            const timeString = String(timeStr).trim();
+            if (!timeString || timeString === '') return '-';
+            
+            // Saat formatını kontrol et (09:00)
+            if (timeString.includes(':')) {
+                const parts = timeString.split(':');
+                if (parts.length >= 2) {
+                    const hour = String(parts[0]).padStart(2, '0');
+                    const minute = String(parts[1]).padStart(2, '0');
+                    return `${hour}:${minute}`;
+                }
+            }
+            
+            // Sadece saat varsa (9)
+            if (!isNaN(timeString) && timeString !== '') {
+                return `${String(timeString).padStart(2, '0')}:00`;
+            }
+            
+            return timeString;
+        }
+        
+        // Saat farkı hesapla (dakika cinsinden)
+        function calculateTimeDifference(startTime, endTime) {
+            if (!startTime || !endTime) return 0;
+            
+            const start = timeToMinutes(startTime);
+            const end = timeToMinutes(endTime);
+            
+            return end > start ? end - start : 0;
+        }
+        
+        // Saat:dakika formatını dakikaya çevir
+        function timeToMinutes(timeStr) {
+            if (!timeStr) return 0;
+            
+            // Excel decimal formatını kontrol et (0.375 = 09:00)
+            if (typeof timeStr === 'number' || (!isNaN(parseFloat(timeStr)) && timeStr.toString().includes('.'))) {
+                const decimal = parseFloat(timeStr);
+                const totalMinutes = Math.round(decimal * 24 * 60); // 24 saat * 60 dakika
+                return totalMinutes;
+            }
+            
+            // Normal saat:dakika formatı
+            const timeString = String(timeStr).trim();
+            if (timeString.includes(':')) {
+                const parts = timeString.split(':');
+                if (parts.length >= 2) {
+                    const hours = parseInt(parts[0]) || 0;
+                    const minutes = parseInt(parts[1]) || 0;
+                    return hours * 60 + minutes;
+                }
+            }
+            
+            return 0;
+        }
+        
+        // Dakikayı saat:dakika formatına çevir
+        function minutesToTime(minutes) {
+            if (!minutes || minutes <= 0) return '0:00';
+            
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            
+            return `${hours}:${mins.toString().padStart(2, '0')}`;
+        }
+        
+        // Personel için gerçek çalışma saati hesapla (Excel'deki işlem saatlerinden)
+        function calculateRealWorkingHours(person) {
+            console.log('🔍 Çalışma saati hesaplanıyor:', person.name, person.transactions?.length || 0, 'işlem');
+            
+            if (!person.transactions || person.transactions.length === 0) {
+                console.log('❌ İşlem verisi yok:', person.name);
+                return { netHours: 0, totalHours: 0, breakHours: 0, efficiency: 0, firstTransaction: null, lastTransaction: null, workingPeriod: 'Veri yok' };
+            }
+            
+            // İşlem saatlerini sırala
+            const validTransactions = person.transactions.filter(t => t.time && t.time !== '-');
+            console.log('✅ Geçerli işlemler:', person.name, validTransactions.length, 'adet');
+            
+            if (validTransactions.length === 0) {
+                console.log('❌ Geçerli saat verisi yok:', person.name);
+                return { netHours: 0, totalHours: 0, breakHours: 0, efficiency: 0, firstTransaction: null, lastTransaction: null, workingPeriod: 'Saat verisi yok' };
+            }
+            
+            // Saatleri dakikaya çevir ve sırala
+            const transactionMinutes = validTransactions.map(t => {
+                const minutes = timeToMinutes(t.time);
+                const formattedTime = formatTime(t.time);
+                return {
+                    ...t,
+                    minutes: minutes,
+                    formattedTime: formattedTime
+                };
+            }).filter(t => t.minutes > 0).sort((a, b) => a.minutes - b.minutes);
+            
+            if (transactionMinutes.length === 0) {
+                console.log('❌ Çevrilebilir saat verisi yok:', person.name);
+                return { netHours: 0, totalHours: 0, breakHours: 0, efficiency: 0, firstTransaction: null, lastTransaction: null, workingPeriod: 'Geçersiz saat' };
+            }
+            
+            const firstTransaction = transactionMinutes[0];
+            const lastTransaction = transactionMinutes[transactionMinutes.length - 1];
+            
+            console.log(`📅 ${person.name} çalışma saatleri: ${firstTransaction.formattedTime} - ${lastTransaction.formattedTime}`);
+            
+            // İlk ve son işlem arasındaki toplam süre
+            const totalWorkingMinutes = lastTransaction.minutes - firstTransaction.minutes;
+            
+            // Mola sürelerini hesapla (işlem yapılmayan boşluklar)
+            let breakMinutes = 0;
+            const breakThreshold = 30; // 30 dakikadan fazla boşluk = mola
+            
+            for (let i = 1; i < transactionMinutes.length; i++) {
+                const gap = transactionMinutes[i].minutes - transactionMinutes[i-1].minutes;
+                if (gap > breakThreshold) {
+                    breakMinutes += gap;
+                    console.log(`☕ ${person.name} mola: ${transactionMinutes[i-1].formattedTime} - ${transactionMinutes[i].formattedTime} (${gap} dk)`);
+                }
+            }
+            
+            // Net çalışma süresi = Toplam süre - Molalar
+            const netWorkingMinutes = Math.max(0, totalWorkingMinutes - breakMinutes);
+            
+            // Verimlilik hesapla (işlem/saat) - BASIT HESAPLAMA
+            const workingHours = netWorkingMinutes / 60;
+            
+            // Eğer net çalışma 1 saatten az ise, saatlik işlem sayısını farklı hesapla
+            let efficiency = 0;
+            if (workingHours > 0) {
+                if (workingHours < 1) {
+                    // 1 saatten az çalışma için: işlem sayısını saate oranla
+                    efficiency = (person.totalTransactions / workingHours).toFixed(1);
+                } else {
+                    // Normal hesaplama
+                    efficiency = (person.totalTransactions / workingHours).toFixed(1);
+                }
+            }
+            
+            console.log(`🔍 DEBUG ${person.name}:`);
+            console.log(`  - İşlem sayısı: ${person.totalTransactions}`);
+            console.log(`  - Net çalışma dakika: ${netWorkingMinutes}`);
+            console.log(`  - Net çalışma saat: ${workingHours.toFixed(2)}`);
+            console.log(`  - Hesaplama: ${person.totalTransactions} / ${workingHours.toFixed(2)} = ${efficiency}`);
+            
+            // Makul verimlilik aralığına sınırla (0-20 işlem/saat)
+            const rawEfficiency = parseFloat(efficiency);
+            if (rawEfficiency > 20) {
+                console.log(`⚠️ UYARI: ${person.name} için çok yüksek verimlilik: ${rawEfficiency}`);
+                // Makul bir değer hesapla: işlem sayısını saate böl ama maksimum 20
+                efficiency = Math.min(20, (person.totalTransactions / Math.max(workingHours, 1))).toFixed(1);
+                console.log(`🔧 DÜZELTME: ${efficiency} işlem/saat olarak ayarlandı`);
+            } else if (rawEfficiency < 0.1 && person.totalTransactions > 0) {
+                // Çok düşük verimlilik de düzelt
+                efficiency = (person.totalTransactions / Math.max(workingHours, 0.5)).toFixed(1);
+                console.log(`🔧 DÜŞÜK VERİMLİLİK DÜZELTME: ${efficiency} işlem/saat`);
+            }
+            
+            console.log(`✅ ${person.name} sonuç: Net ${netWorkingMinutes}dk, Mola ${breakMinutes}dk, Verimlilik ${efficiency}`);
+            
+            return {
+                netHours: netWorkingMinutes,
+                totalHours: totalWorkingMinutes,
+                breakHours: breakMinutes,
+                efficiency: parseFloat(efficiency),
+                firstTransaction: firstTransaction.formattedTime,
+                lastTransaction: lastTransaction.formattedTime,
+                workingPeriod: `${firstTransaction.formattedTime} - ${lastTransaction.formattedTime}`
+            };
+        }
+        
+        // Personel listesini göster
+        function showPersonnelList() {
+            if (!appData || !appData.personnel) {
+                alert('Personel verisi bulunamadı!');
+                return;
+            }
+            
+            const modalContent = `
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <div class="personnel-avatar large">
+                            <span>👥</span>
+                        </div>
+                        <div>
+                            <h2>Personel Listesi</h2>
+                            <p>${appData.personnel.length} Aktif Personel</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="personnel-grid-modal">
+                        ${appData.personnel.map(person => {
+                            const performanceClass = getPerformanceClass(person.performance);
+                            return `
+                                <div class="personnel-card-modal" onclick="showPersonnelDetailsByName('${person.name}')">
+                                    <div class="personnel-header">
+                                        <div class="personnel-avatar">
+                                            <span>${person.name.charAt(0).toUpperCase()}</span>
+                                        </div>
+                                        <div class="personnel-info">
+                                            <h4>${person.name}</h4>
+                                            <span class="personnel-role">Operasyon Personeli</span>
+                                        </div>
+                                        <div class="personnel-performance ${performanceClass}">
+                                            <span class="performance-score">${person.performance}%</span>
+                                            <span class="performance-label">Performans</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="personnel-stats">
+                                        <div class="stat-item">
+                                            <span class="stat-icon">📦</span>
+                                            <div class="stat-content">
+                                                <span class="stat-value">${person.totalTransactions}</span>
+                                                <span class="stat-label">İşlem</span>
+                                            </div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-icon">🔴</span>
+                                            <div class="stat-content">
+                                                <span class="stat-value">${person.totalQuantity.toLocaleString()}</span>
+                                                <span class="stat-label">Miktar</span>
+                                            </div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-icon">🏢</span>
+                                            <div class="stat-content">
+                                                <span class="stat-value">${person.warehouses.length}</span>
+                                                <span class="stat-label">Proje</span>
+                                            </div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-icon">⏰</span>
+                                            <div class="stat-content">
+                                                <span class="stat-value">${minutesToTime(person.workingHours?.netHours || 0)}</span>
+                                                <span class="stat-label">Çalışma</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="personnel-footer">
+                                        <button class="btn-detail" onclick="event.stopPropagation(); showPersonnelDetailsByName('${person.name}')">
+                                            Detayları Görüntüle
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalContent);
+        }
+        
+        // Miktar detaylarını göster
+        function showQuantityDetails() {
+            if (!appData) return;
+            
+            const modalContent = `
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <div class="personnel-avatar large">
+                            <span>📊</span>
+                        </div>
+                        <div>
+                            <h2>Miktar Detayları</h2>
+                            <p>Toplam ${appData.totalQuantity.toLocaleString()} Birim</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="detail-stats">
+                        <div class="detail-stat">
+                            <span class="detail-icon">📊</span>
+                            <div>
+                                <span class="detail-value">${appData.totalQuantity.toLocaleString()}</span>
+                                <span class="detail-label">Toplam Miktar</span>
+                            </div>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-icon">⚡</span>
+                            <div>
+                                <span class="detail-value">${Math.round(appData.totalQuantity / appData.totalTransactions).toLocaleString()}</span>
+                                <span class="detail-label">Ortalama/İşlem</span>
+                            </div>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-icon">👥</span>
+                            <div>
+                                <span class="detail-value">${Math.round(appData.totalQuantity / appData.personnel.length).toLocaleString()}</span>
+                                <span class="detail-label">Ortalama/Personel</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Personel Bazında Miktar Dağılımı</h3>
+                        <div class="quantity-list">
+                            ${appData.personnel.sort((a, b) => b.totalQuantity - a.totalQuantity).map(person => `
+                                <div class="quantity-item">
+                                    <div class="quantity-person">
+                                        <div class="personnel-avatar small">
+                                            <span>${person.name.charAt(0).toUpperCase()}</span>
+                                        </div>
+                                        <span>${person.name}</span>
+                                    </div>
+                                    <div class="quantity-bar">
+                                        <div class="quantity-fill" style="width: ${(person.totalQuantity / Math.max(...appData.personnel.map(p => p.totalQuantity))) * 100}%"></div>
+                                        <span class="quantity-value">${person.totalQuantity.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalContent);
+        }
+        
+        // Proje detaylarını göster
+        function showWarehouseDetails() {
+            if (!appData) return;
+            
+            const modalContent = `
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <div class="personnel-avatar large">
+                            <span>🏢</span>
+                        </div>
+                        <div>
+                            <h2>Proje Detayları</h2>
+                            <p>${appData.warehouses.length} Aktif Proje</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="detail-section">
+                        <h3>Aktif Projeler</h3>
+                        <div class="warehouse-grid">
+                            ${appData.warehouses.map(warehouse => {
+                                const warehousePersonnel = appData.personnel.filter(p => p.warehouses.includes(warehouse));
+                                const warehouseQuantity = warehousePersonnel.reduce((sum, p) => sum + p.totalQuantity, 0);
+                                return `
+                                    <div class="warehouse-card">
+                                        <div class="warehouse-header">
+                                            <span class="warehouse-icon">🏢</span>
+                                            <h4>${warehouse}</h4>
+                                        </div>
+                                        <div class="warehouse-stats">
+                                            <div class="warehouse-stat">
+                                                <span>👥 ${warehousePersonnel.length} Personel</span>
+                                            </div>
+                                            <div class="warehouse-stat">
+                                                <span>📊 ${warehouseQuantity.toLocaleString()} Miktar</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalContent);
+        }
+        
+        // İşlem detaylarını göster
+        function showTransactionDetails() {
+            if (!appData) return;
+            
+            const modalContent = `
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <div class="personnel-avatar large">
+                            <span>📦</span>
+                        </div>
+                        <div>
+                            <h2>İşlem Detayları</h2>
+                            <p>Toplam ${appData.totalTransactions.toLocaleString()} İşlem</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="detail-stats">
+                        <div class="detail-stat">
+                            <span class="detail-icon">📦</span>
+                            <div>
+                                <span class="detail-value">${appData.totalTransactions.toLocaleString()}</span>
+                                <span class="detail-label">Toplam İşlem</span>
+                            </div>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-icon">👥</span>
+                            <div>
+                                <span class="detail-value">${Math.round(appData.totalTransactions / appData.personnel.length)}</span>
+                                <span class="detail-label">Ortalama/Personel</span>
+                            </div>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-icon">🏢</span>
+                            <div>
+                                <span class="detail-value">${Math.round(appData.totalTransactions / appData.warehouses.length)}</span>
+                                <span class="detail-label">Ortalama/Proje</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Hareket Tipleri</h3>
+                        <div class="tag-list">
+                            ${appData.movementTypes.map(type => `<span class="tag movement-tag">${type}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalContent);
+        }
+
+        // Personel listesi güncelleme (artık kullanılmıyor - KPI kartları üzerinden erişiliyor)
+        function updatePersonnelList(personnel) {
+            // Bu fonksiyon artık kullanılmıyor
+            // Personel listesi KPI kartları üzerinden modal olarak gösteriliyor
+            console.log('Personel listesi hazır:', personnel.length, 'personel');
+        }
+        
+        // Performans sınıfı belirleme
+        function getPerformanceClass(performance) {
+            if (performance >= 80) return 'excellent';
+            if (performance >= 60) return 'good';
+            if (performance >= 40) return 'average';
+            return 'poor';
+        }
+        
+        // Hareket tipi sınıfı belirleme
+        function getMovementClass(movementType) {
+            if (!movementType) return 'default';
+            const type = movementType.toLowerCase();
+            if (type.includes('giriş') || type.includes('giris')) return 'entry';
+            if (type.includes('çıkış') || type.includes('cikis')) return 'exit';
+            if (type.includes('transfer')) return 'transfer';
+            if (type.includes('sayım') || type.includes('sayim')) return 'count';
+            return 'default';
+        }
+        
+        // Personel detaylarını isimle göster
+        function showPersonnelDetailsByName(personName) {
+            if (!appData || !appData.personnel) {
+                alert('Personel verisi bulunamadı!');
+                return;
+            }
+            
+            const person = appData.personnel.find(p => p.name === personName);
+            if (!person) {
+                alert('Personel bulunamadı: ' + personName);
+                return;
+            }
+            
+            showPersonnelDetails(person);
+        }
+        
+        // Personel detaylarını göster
+        function showPersonnelDetails(person) {
+            const modalContent = `
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <div class="personnel-avatar large">
+                            <span>${person.name.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div>
+                            <h2>${person.name}</h2>
+                            <p>Operasyon Personeli</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="detail-stats">
+                        <div class="detail-stat">
+                            <span class="detail-icon">📦</span>
+                            <div>
+                                <span class="detail-value">${person.totalTransactions}</span>
+                                <span class="detail-label">Toplam İşlem</span>
+                            </div>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-icon">📊</span>
+                            <div>
+                                <span class="detail-value">${person.totalQuantity}</span>
+                                <span class="detail-label">Toplam Miktar</span>
+                            </div>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-icon">🎯</span>
+                            <div>
+                                <span class="detail-value">${person.performance}%</span>
+                                <span class="detail-label">Performans</span>
+                            </div>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-icon">⏰</span>
+                            <div>
+                                <span class="detail-value">${minutesToTime(person.workingHours?.netHours || 0)}</span>
+                                <span class="detail-label">Net Çalışma</span>
+                            </div>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-icon">⚡</span>
+                            <div>
+                                <span class="detail-value">${person.workingHours?.efficiency || 0}</span>
+                                <span class="detail-label">İşlem/Saat</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Çalıştığı Projeler</h3>
+                        <div class="tag-list">
+                            ${person.warehouses.map(w => `<span class="tag warehouse-tag">${w}</span>`).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Hareket Tipleri</h3>
+                        <div class="tag-list">
+                            ${person.movementTypes.map(m => `<span class="tag movement-tag">${m}</span>`).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Çalışma Saatleri</h3>
+                        <div class="working-time-info">
+                            <div class="time-info-item">
+                                <span class="time-label">Çalışma Saatleri:</span>
+                                <span class="time-value">${person.workingHours?.workingPeriod || 'Veri yok'}</span>
+                            </div>
+                            <div class="time-info-item">
+                                <span class="time-label">Net Çalışma:</span>
+                                <span class="time-value">${minutesToTime(person.workingHours?.netHours || 0)}</span>
+                            </div>
+                            <div class="time-info-item">
+                                <span class="time-label">Mola Süresi:</span>
+                                <span class="time-value">${minutesToTime(person.workingHours?.breakHours || 0)}</span>
+                            </div>
+                            <div class="time-info-item">
+                                <span class="time-label">Verimlilik:</span>
+                                <span class="time-value">${person.workingHours?.efficiency || 0} işlem/saat</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Tüm İşlem Geçmişi (${person.transactions.length} İşlem)</h3>
+                        <div class="transactions-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">İlk İşlem:</span>
+                                <span class="summary-value">${person.workingHours?.firstTransaction || '-'}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Son İşlem:</span>
+                                <span class="summary-value">${person.workingHours?.lastTransaction || '-'}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Toplam Miktar:</span>
+                                <span class="summary-value">${person.totalQuantity.toLocaleString()}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="transactions-table-container">
+                            <div class="transactions-table">
+                                <div class="table-header">
+                                    <span>Sıra</span>
+                                    <span>Tarih</span>
+                                    <span>Saat</span>
+                                    <span>Hareket Tipi</span>
+                                    <span>Proje</span>
+                                    <span>SKU Kodu</span>
+                                    <span>Miktar</span>
+                                </div>
+                                ${person.transactions.map((t, index) => `
+                                    <div class="table-row ${index % 2 === 0 ? 'even' : 'odd'}">
+                                        <span class="row-number">${index + 1}</span>
+                                        <span class="transaction-date">${t.date || '-'}</span>
+                                        <span class="transaction-time">${formatTime(t.time) || '-'}</span>
+                                        <span class="movement-type">
+                                            <span class="movement-badge ${getMovementClass(t.movementType)}">${t.movementType || '-'}</span>
+                                        </span>
+                                        <span class="warehouse-name">${t.warehouse || '-'}</span>
+                                        <span class="sku-code">${t.sku || '-'}</span>
+                                        <span class="quantity-amount">${t.quantity ? t.quantity.toLocaleString() : '-'}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="transactions-stats">
+                            <div class="stat-group">
+                                <h4>Hareket Tipi Dağılımı</h4>
+                                <div class="movement-stats">
+                                    ${(() => {
+                                        const movementCounts = {};
+                                        person.transactions.forEach(t => {
+                                            if (t.movementType) {
+                                                movementCounts[t.movementType] = (movementCounts[t.movementType] || 0) + 1;
+                                            }
+                                        });
+                                        return Object.entries(movementCounts).map(([type, count]) => `
+                                            <div class="movement-stat-item">
+                                                <span class="movement-badge ${getMovementClass(type)}">${type}</span>
+                                                <span class="movement-count">${count} adet</span>
+                                            </div>
+                                        `).join('');
+                                    })()}
+                                </div>
+                            </div>
+                            
+                            <div class="stat-group">
+                                <h4>Saatlik Dağılım</h4>
+                                <div class="hourly-stats">
+                                    ${(() => {
+                                        const hourCounts = {};
+                                        person.transactions.forEach(t => {
+                                            if (t.time) {
+                                                const hour = formatTime(t.time).split(':')[0];
+                                                hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+                                            }
+                                        });
+                                        return Object.entries(hourCounts).sort().map(([hour, count]) => `
+                                            <div class="hour-stat-item">
+                                                <span class="hour-label">${hour}:00</span>
+                                                <div class="hour-bar">
+                                                    <div class="hour-fill" style="width: ${(count / Math.max(...Object.values(hourCounts))) * 100}%"></div>
+                                                    <span class="hour-count">${count}</span>
+                                                </div>
+                                            </div>
+                                        `).join('');
+                                    })()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalContent);
+        }
+        
+        // Çalışma saatleri detaylarını göster
+        function showWorkingHours() {
+            if (!appData) return;
+            
+            const modalContent = `
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <div class="personnel-avatar large">
+                            <span>⏰</span>
+                        </div>
+                        <div>
+                            <h2>Çalışma Saatleri Analizi</h2>
+                            <p>Personel bazında net çalışma süreleri</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="detail-stats">
+                        <div class="detail-stat">
+                            <span class="detail-icon">⏰</span>
+                            <div>
+                                <span class="detail-value">${minutesToTime(appData.personnel.reduce((sum, p) => sum + (p.workingHours?.netHours || 0), 0))}</span>
+                                <span class="detail-label">Toplam Net Çalışma</span>
+                            </div>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-icon">☕</span>
+                            <div>
+                                <span class="detail-value">${minutesToTime(appData.personnel.reduce((sum, p) => sum + (p.workingHours?.breakHours || 0), 0))}</span>
+                                <span class="detail-label">Toplam Mola</span>
+                            </div>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-icon">📊</span>
+                            <div>
+                                <span class="detail-value">${(() => {
+                                    const totalNetHours = appData.personnel.reduce((sum, p) => sum + (p.workingHours?.netHours || 0), 0) / 60;
+                                    return totalNetHours > 0 ? (appData.totalTransactions / totalNetHours).toFixed(1) : 0;
+                                })()}</span>
+                                <span class="detail-label">İşlem/Saat</span>
+                            </div>
+                        </div>
+                        <div class="detail-stat">
+                            <span class="detail-icon">⚡</span>
+                            <div>
+                                <span class="detail-value">${(() => {
+                                    const validPersonnel = appData.personnel.filter(p => p.workingHours?.efficiency > 0);
+                                    const avgEfficiency = validPersonnel.length > 0 ? 
+                                        validPersonnel.reduce((sum, p) => sum + parseFloat(p.workingHours.efficiency), 0) / validPersonnel.length : 0;
+                                    return avgEfficiency.toFixed(1);
+                                })()}</span>
+                                <span class="detail-label">Ort. İşlem/Saat</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Proje Bazında Mola Saatleri</h3>
+                        <div class="shift-schedule-grid">
+                            ${Object.entries(defaultShiftSchedule).map(([project, schedule]) => `
+                                <div class="shift-card">
+                                    <div class="shift-header">
+                                        <h4>${project}</h4>
+                                    </div>
+                                    <div class="shift-timeline">
+                                        <div class="timeline-item work">
+                                            <span class="timeline-time">${schedule.vardiyaBaslangic}</span>
+                                            <span class="timeline-label">Vardiya Başlangıç</span>
+                                        </div>
+                                        <div class="timeline-item break">
+                                            <span class="timeline-time">${schedule.ilkMola}</span>
+                                            <span class="timeline-label">İlk Mola</span>
+                                        </div>
+                                        <div class="timeline-item break">
+                                            <span class="timeline-time">${schedule.yemekMolasi}</span>
+                                            <span class="timeline-label">Yemek Molası</span>
+                                        </div>
+                                        <div class="timeline-item break">
+                                            <span class="timeline-time">${schedule.ikinciMola}</span>
+                                            <span class="timeline-label">İkinci Mola</span>
+                                        </div>
+                                        <div class="timeline-item work">
+                                            <span class="timeline-time">${schedule.vardiyaBitis}</span>
+                                            <span class="timeline-label">Vardiya Bitiş</span>
+                                        </div>
+                                        <div class="timeline-item overtime">
+                                            <span class="timeline-time">${schedule.mesaiBaslangic}</span>
+                                            <span class="timeline-label">Mesai Başlangıç</span>
+                                        </div>
+                                        <div class="timeline-item break">
+                                            <span class="timeline-time">${schedule.mesaiMola}</span>
+                                            <span class="timeline-label">Mesai Mola</span>
+                                        </div>
+                                        <div class="timeline-item overtime">
+                                            <span class="timeline-time">${schedule.mesaiBitis}</span>
+                                            <span class="timeline-label">Mesai Bitiş</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Personel Bazında Gerçek Çalışma Analizi</h3>
+                        <div class="working-hours-table">
+                            <div class="table-header">
+                                <span>Personel</span>
+                                <span>Çalışma Saatleri</span>
+                                <span>Net Çalışma</span>
+                                <span>Mola Süresi</span>
+                                <span>İşlem/Saat</span>
+                                <span>Verimlilik</span>
+                            </div>
+                            ${appData.personnel.map(person => `
+                                <div class="table-row">
+                                    <span>
+                                        <div class="personnel-avatar small">
+                                            <span>${person.name.charAt(0).toUpperCase()}</span>
+                                        </div>
+                                        ${person.name}
+                                    </span>
+                                    <span class="working-period">
+                                        ${person.workingHours?.workingPeriod || 'Veri yok'}
+                                    </span>
+                                    <span class="net-hours">
+                                        ${minutesToTime(person.workingHours?.netHours || 0)}
+                                    </span>
+                                    <span class="break-hours">
+                                        ${minutesToTime(person.workingHours?.breakHours || 0)}
+                                    </span>
+                                    <span class="efficiency">
+                                        ${person.workingHours?.efficiency || 0}
+                                    </span>
+                                    <span>
+                                        <div class="performance-badge ${getPerformanceClass(person.performance)}">
+                                            ${person.performance}%
+                                        </div>
+                                    </span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalContent);
+        }
+        
+        // Modal oluştur ve göster
+        function showModal(content) {
+            // Eski modal varsa kaldır
+            const existingModal = document.getElementById('personnel-modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Modal wrapper oluştur
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.id = 'personnel-modal';
+            
+            // Modal container oluştur
+            const modalContainer = document.createElement('div');
+            modalContainer.className = 'modal-container';
+            modalContainer.innerHTML = content;
+            
+            modal.appendChild(modalContainer);
+            document.body.appendChild(modal);
+        }
+        
+        // Modal kapat
+        function closeModal() {
+            const modal = document.getElementById('personnel-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Modal dışına tıklayınca kapat
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                closeModal();
+            }
+        });
+
+        // Loading gösterme/gizleme
+        function showLoading() {
+            document.getElementById('upload-progress').style.display = 'block';
+        }
+        
+        function hideLoading() {
+            document.getElementById('upload-progress').style.display = 'none';
+        }
+
+        // Debug toggle
+        function toggleDebug() {
+            console.log('Debug bilgileri:', appData);
+            if (appData) {
+                alert('Personel: ' + appData.personnel.length + 
+                      '\nİşlem: ' + appData.totalTransactions + 
+                      '\nMiktar: ' + appData.totalQuantity + 
+                      '\nProje: ' + appData.warehouses.length);
+            }
+        }
+
+        // Menu toggle
+        function toggleMenu() {
+            const menu = document.getElementById('dropdown-menu');
+            const menuBtn = document.getElementById('menu-btn');
+            
+            menu.classList.toggle('show');
+            menuBtn.classList.toggle('active');
+        }
+
+        // Mevcut sekmede dosya seç
+        function selectFileCurrentTab() {
+            const fileInput = document.getElementById('file-input');
+            fileInput.click();
+            
+            // Menüyü kapat
+            closeMenu();
+            
+            showToast('📁 Lütfen Excel dosyasını seçin', 'info');
+        }
+
+        // Yeni sekmede aç
+        function openNewTab() {
+            // Yeni sekme aç
+            const newWindow = window.open(window.location.href, '_blank');
+            
+            // Menüyü kapat
+            closeMenu();
+            
+            showToast('🚀 Yeni sekmede dashboard açıldı', 'info');
+        }
+
+        // Menüyü kapat (yardımcı fonksiyon)
+        function closeMenu() {
+            const menu = document.getElementById('dropdown-menu');
+            const menuBtn = document.getElementById('menu-btn');
+            menu.classList.remove('show');
+            menuBtn.classList.remove('active');
+        }
+
+        // Ayarlar menüsü toggle
+        function toggleSettings() {
+            const settingsMenu = document.getElementById('settings-menu');
+            const settingsBtn = document.getElementById('settings-btn');
+            
+            settingsMenu.classList.toggle('show');
+            settingsBtn.classList.toggle('active');
+            
+            // Diğer menüleri kapat
+            closeMenu();
+        }
+
+        // Tema değiştir
+        function setTheme(theme) {
+            // Tema'yı localStorage'a kaydet
+            localStorage.setItem('dashboard-theme', theme);
+            
+            // Tema'yı uygula
+            applyTheme(theme);
+            
+            // Ayarlar menüsünü kapat
+            closeSettings();
+            
+            // Toast mesajı göster
+            const themeNames = {
+                'light': 'Aydınlık',
+                'dark': 'Karanlık', 
+                'auto': 'Otomatik'
+            };
+            showToast(`🎨 ${themeNames[theme]} tema aktif edildi`, 'info');
+        }
+
+        // Tema uygula
+        function applyTheme(theme) {
+            const body = document.body;
+            
+            // Mevcut tema sınıflarını temizle
+            body.classList.remove('theme-light', 'theme-dark', 'theme-auto');
+            
+            // Yeni tema sınıfını ekle
+            body.classList.add(`theme-${theme}`);
+            
+            // Otomatik tema için sistem tercihini kontrol et
+            if (theme === 'auto') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                body.classList.add(prefersDark ? 'theme-dark' : 'theme-light');
+            }
+            
+            // Aktif tema göstergesini güncelle
+            updateThemeIndicators(theme);
+        }
+
+        // Tema göstergelerini güncelle
+        function updateThemeIndicators(activeTheme) {
+            const indicators = ['light-indicator', 'dark-indicator', 'auto-indicator'];
+            
+            indicators.forEach(id => {
+                const indicator = document.getElementById(id);
+                if (indicator) {
+                    indicator.classList.remove('active');
+                }
+            });
+            
+            const activeIndicator = document.getElementById(`${activeTheme}-indicator`);
+            if (activeIndicator) {
+                activeIndicator.classList.add('active');
+            }
+        }
+
+        // Ayarlar menüsünü kapat
+        function closeSettings() {
+            const settingsMenu = document.getElementById('settings-menu');
+            const settingsBtn = document.getElementById('settings-btn');
+            settingsMenu.classList.remove('show');
+            settingsBtn.classList.remove('active');
+        }
+
+        // ============================================
+        // YETKİLENDİRME SİSTEMİ
+        // ============================================
+
+        // Yetkili email listesini getir (Firebase'den)
+        async function getAuthorizedEmails() {
+            return await FirebaseAuth.getAuthorizedEmails();
+        }
+
+        // Admin email listesini getir (Firebase'den)
+        async function getAdminEmails() {
+            return await FirebaseAuth.getAdminEmails();
+        }
+
+        // Email validasyonu
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Giriş kontrolü
+        async function checkAccess() {
+            const savedEmail = localStorage.getItem('dashboard-current-user');
+            
+            if (!savedEmail) {
+                showLoginScreen();
+                return false;
+            }
+
+            const isAuthorized = await FirebaseAuth.checkUserAuthorization(savedEmail);
+            
+            if (isAuthorized) {
+                const adminEmails = await getAdminEmails();
+                currentUserEmail = savedEmail;
+                isAuthenticated = true;
+                isAdmin = adminEmails.includes(savedEmail);
+                showDashboard();
+                updateMenuVisibility();
+                return true;
+            } else {
+                showLoginScreen();
+                return false;
+            }
+        }
+
+        // Login ekranını göster
+        function showLoginScreen() {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('main-header').style.display = 'none';
+            document.getElementById('main-dashboard').style.display = 'none';
+            
+            setTimeout(() => {
+                const emailInput = document.getElementById('login-email-input');
+                if (emailInput) {
+                    emailInput.focus();
+                    emailInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            performLogin();
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        // Dashboard'ı göster
+        function showDashboard() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-header').style.display = 'block';
+            document.getElementById('main-dashboard').style.display = 'block';
+        }
+
+        // Giriş yap
+        async function performLogin() {
+            const emailInput = document.getElementById('login-email-input');
+            const email = emailInput.value.trim().toLowerCase();
+            
+            if (!email) {
+                showToast('❌ Lütfen email adresinizi girin', 'error');
+                return;
+            }
+            
+            if (!FirebaseAuth.isValidEmail(email)) {
+                showToast('❌ Geçerli bir email adresi girin', 'error');
+                return;
+            }
+            
+            showToast('🔄 Yetki kontrol ediliyor...', 'info');
+            
+            const isAuthorized = await FirebaseAuth.checkUserAuthorization(email);
+            
+            if (isAuthorized) {
+                const adminEmails = await getAdminEmails();
+                
+                localStorage.setItem('dashboard-current-user', email);
+                currentUserEmail = email;
+                isAuthenticated = true;
+                isAdmin = adminEmails.includes(email);
+                
+                showDashboard();
+                updateMenuVisibility();
+                
+                if (isAdmin) {
+                    showToast('👑 Anahtar Kullanıcı olarak giriş yapıldı!', 'success');
+                } else {
+                    showToast('✅ Başarıyla giriş yapıldı!', 'success');
+                }
+            } else {
+                showToast('❌ Bu email adresi yetkili değil!', 'error');
+            }
+        }
+
+        // Menü görünürlüğünü güncelle
+        function updateMenuVisibility() {
+            const adminMenuItem = document.getElementById('admin-menu-item');
+            if (adminMenuItem) {
+                adminMenuItem.style.display = isAdmin ? 'flex' : 'none';
+            }
+        }
+
+        // Kullanıcı bilgisini göster
+        function showUserInfo() {
+            const userType = isAdmin ? 'Anahtar Kullanıcı' : 'Normal Kullanıcı';
+            const modalContent = `
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <div class="personnel-avatar large">
+                            <span>${isAdmin ? '👑' : '👤'}</span>
+                        </div>
+                        <div>
+                            <h2>Kullanıcı Bilgisi</h2>
+                            <p>${userType}</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="detail-section">
+                        <div class="user-info-card">
+                            <div class="info-row">
+                                <span class="info-label">Email:</span>
+                                <span class="info-value">${currentUserEmail}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Yetki Seviyesi:</span>
+                                <span class="info-value">${userType}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Durum:</span>
+                                <span class="info-value">✅ Aktif</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalContent);
+            closeSettings();
+        }
+
+        // Admin panelini göster
+        async function showAdminPanel() {
+            if (!isAdmin) {
+                showToast('❌ Bu özellik sadece anahtar kullanıcı için!', 'error');
+                return;
+            }
+            
+            showToast('🔄 Kullanıcı listesi yükleniyor...', 'info');
+            
+            const authorizedEmails = await getAuthorizedEmails();
+            const adminEmails = await getAdminEmails();
+            
+            const modalContent = `
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <div class="personnel-avatar large">
+                            <span>👑</span>
+                        </div>
+                        <div>
+                            <h2>Yetkilendirme Paneli</h2>
+                            <p>Kullanıcı yetkilendirme yönetimi</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="admin-panel">
+                        <div class="add-user-section">
+                            <h3>👑 Anahtar Kullanıcı Ekle</h3>
+                            <div class="form-group">
+                                <input type="email" id="new-admin-input" class="form-input" placeholder="anahtar.kullanici@email.com" />
+                                <button class="btn btn-primary" onclick="addNewAdmin()">
+                                    👑 Anahtar Kullanıcı Yap
+                                </button>
+                            </div>
+                            <small style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                                ⚠️ Anahtar kullanıcılar yetkilendirme paneline erişebilir ve diğer kullanıcıları yönetebilir.
+                            </small>
+                        </div>
+                        
+                        <div class="add-user-section">
+                            <h3>👤 Normal Kullanıcı Ekle</h3>
+                            <div class="form-group">
+                                <input type="email" id="new-user-input" class="form-input" placeholder="kullanici@email.com" />
+                                <button class="btn btn-secondary" onclick="addNewUser()">
+                                    ➕ Yetki Ver
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="users-section">
+                            <h3>👑 Anahtar Kullanıcılar (${adminEmails.length})</h3>
+                            <div class="users-list">
+                                ${adminEmails.map(email => `
+                                    <div class="user-item admin-user-item">
+                                        <div class="user-info">
+                                            <span class="user-icon">👑</span>
+                                            <div class="user-details">
+                                                <span class="user-email">${email}</span>
+                                                ${email === ADMIN_EMAIL ? '<span class="user-badge">Ana Anahtar</span>' : '<span class="user-badge">Anahtar</span>'}
+                                            </div>
+                                        </div>
+                                        ${email !== ADMIN_EMAIL ? `
+                                            <button class="btn-remove" onclick="removeAdmin('${email}')" title="Anahtar Yetkisini Kaldır">
+                                                🗑️
+                                            </button>
+                                        ` : '<span class="protected-badge">🛡️ Korumalı</span>'}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="users-section">
+                            <h3>👤 Normal Kullanıcılar (${authorizedEmails.length})</h3>
+                            <div class="users-list">
+                                ${authorizedEmails.length === 0 ? 
+                                    '<div class="no-users">Henüz normal kullanıcı eklenmemiş</div>' :
+                                    authorizedEmails.map(email => `
+                                        <div class="user-item">
+                                            <div class="user-info">
+                                                <span class="user-icon">👤</span>
+                                                <div class="user-details">
+                                                    <span class="user-email">${email}</span>
+                                                    <span class="user-badge normal-badge">Normal</span>
+                                                </div>
+                                            </div>
+                                            <button class="btn-remove" onclick="removeUser('${email}')" title="Yetkiyi Kaldır">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    `).join('')
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="danger-zone-section">
+                            <h3>⚠️ Tehlikeli Bölge</h3>
+                            <div class="danger-zone-content">
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+                                    Veritabanını sıfırlamak TÜM kullanıcı yetkilerini silecektir. Bu işlem geri alınamaz!
+                                </p>
+                                <button class="btn btn-danger" onclick="resetDatabase()" style="background: #dc3545;">
+                                    🗑️ Veritabanını Sıfırla
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalContent);
+            closeSettings();
+        }
+
+        // Yeni admin ekle
+        async function addNewAdmin() {
+            const adminInput = document.getElementById('new-admin-input');
+            const email = adminInput.value.trim().toLowerCase();
+            
+            if (!email) {
+                showToast('❌ Lütfen email adresi girin', 'error');
+                return;
+            }
+            
+            if (!FirebaseAuth.isValidEmail(email)) {
+                showToast('❌ Geçerli bir email adresi girin', 'error');
+                return;
+            }
+            
+            if (email === ADMIN_EMAIL) {
+                showToast('⚠️ Bu email zaten ana anahtar kullanıcı', 'warning');
+                return;
+            }
+            
+            const adminEmails = await getAdminEmails();
+            if (adminEmails.includes(email)) {
+                showToast('⚠️ Bu kullanıcı zaten anahtar kullanıcı', 'warning');
+                return;
+            }
+            
+            if (confirm(`"${email}" kullanıcısını anahtar kullanıcı yapmak istediğinizden emin misiniz?`)) {
+                showToast('🔄 Ekleniyor...', 'info');
+                
+                const success = await FirebaseAuth.addAdminEmail(email);
+                
+                if (success) {
+                    adminInput.value = '';
+                    showToast('👑 Anahtar kullanıcı yetkisi verildi', 'success');
+                    setTimeout(() => showAdminPanel(), 500);
+                } else {
+                    showToast('❌ Bir hata oluştu', 'error');
+                }
+            }
+        }
+
+        // Yeni normal kullanıcı ekle
+        async function addNewUser() {
+            const userInput = document.getElementById('new-user-input');
+            const email = userInput.value.trim().toLowerCase();
+            
+            if (!email) {
+                showToast('❌ Lütfen email adresi girin', 'error');
+                return;
+            }
+            
+            if (!FirebaseAuth.isValidEmail(email)) {
+                showToast('❌ Geçerli bir email adresi girin', 'error');
+                return;
+            }
+            
+            if (email === ADMIN_EMAIL) {
+                showToast('⚠️ Bu email zaten ana anahtar kullanıcı', 'warning');
+                return;
+            }
+            
+            const adminEmails = await getAdminEmails();
+            if (adminEmails.includes(email)) {
+                showToast('⚠️ Bu kullanıcı zaten anahtar kullanıcı', 'warning');
+                return;
+            }
+            
+            const authorizedEmails = await getAuthorizedEmails();
+            if (authorizedEmails.includes(email)) {
+                showToast('⚠️ Bu kullanıcı zaten yetkili', 'warning');
+                return;
+            }
+            
+            showToast('🔄 Ekleniyor...', 'info');
+            
+            const success = await FirebaseAuth.addAuthorizedEmail(email);
+            
+            if (success) {
+                userInput.value = '';
+                showToast('✅ Normal kullanıcı yetkisi verildi', 'success');
+                setTimeout(() => showAdminPanel(), 500);
+            } else {
+                showToast('❌ Bir hata oluştu', 'error');
+            }
+        }
+
+        // Admin yetkisini kaldır
+        async function removeAdmin(email) {
+            if (email === ADMIN_EMAIL) return;
+            
+            if (confirm(`"${email}" kullanıcısının anahtar kullanıcı yetkisini kaldırmak istediğinizden emin misiniz?`)) {
+                showToast('🔄 Kaldırılıyor...', 'info');
+                
+                const success = await FirebaseAuth.removeAdminEmail(email);
+                
+                if (success) {
+                    // Normal kullanıcı olarak ekle
+                    await FirebaseAuth.addAuthorizedEmail(email);
+                    
+                    showToast('👑 Anahtar kullanıcı yetkisi kaldırıldı', 'success');
+                    setTimeout(() => showAdminPanel(), 500);
+                } else {
+                    showToast('❌ Bir hata oluştu', 'error');
+                }
+            }
+        }
+
+        // Normal kullanıcı yetkisini kaldır
+        async function removeUser(email) {
+            if (confirm(`"${email}" kullanıcısının yetkisini tamamen kaldırmak istediğinizden emin misiniz?`)) {
+                showToast('🔄 Kaldırılıyor...', 'info');
+                
+                const success = await FirebaseAuth.removeAuthorizedEmail(email);
+                
+                if (success) {
+                    showToast('✅ Kullanıcı yetkisi kaldırıldı', 'success');
+                    setTimeout(() => showAdminPanel(), 500);
+                } else {
+                    showToast('❌ Bir hata oluştu', 'error');
+                }
+            }
+        }
+
+        // Veritabanını sıfırla
+        async function resetDatabase() {
+            const confirmation = prompt('⚠️ UYARI: Bu işlem TÜM kullanıcı yetkilerini silecektir!\n\nDevam etmek için "SIFIRLA" yazın:');
+            
+            if (confirmation !== 'SIFIRLA') {
+                if (confirmation !== null) {
+                    showToast('❌ İşlem iptal edildi', 'error');
+                }
+                return;
+            }
+            
+            showToast('🔄 Veritabanı sıfırlanıyor...', 'info');
+            
+            try {
+                const response = await fetch('https://karinca-dashboard-bd8bd-default-rtdb.firebaseio.com/.json', {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        authorizedEmails: [],
+                        adminEmails: []
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast('✅ Veritabanı sıfırlandı! Tüm yetkiler silindi.', 'success');
+                    setTimeout(() => {
+                        closeModal();
+                        logout();
+                    }, 2000);
+                } else {
+                    throw new Error('Sıfırlama başarısız');
+                }
+            } catch (error) {
+                console.error('Reset hatası:', error);
+                showToast('❌ Veritabanı sıfırlanamadı: ' + error.message, 'error');
+            }
+        }
+
+        // Çıkış yap
+        function logout() {
+            if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+                localStorage.removeItem('dashboard-current-user');
+                currentUserEmail = null;
+                isAuthenticated = false;
+                isAdmin = false;
+                appData = null;
+                
+                showLoginScreen();
+                closeSettings();
+                showToast('👋 Çıkış yapıldı', 'info');
+            }
+        }
+
+        // ============================================
+        // SAYFA BAŞLATMA
+        // ============================================
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Dashboard yükleniyor...');
+            
+            // Firebase'i başlat
+            console.log('🔥 Firebase başlatılıyor...');
+            const firebaseInitialized = FirebaseAuth.initialize();
+            
+            if (firebaseInitialized) {
+                console.log('✅ Firebase başarıyla başlatıldı');
+                // Firebase değişikliklerini dinle
+                FirebaseAuth.setupListeners();
+            } else {
+                console.warn('⚠️ Firebase başlatılamadı, yerel mod kullanılacak');
+            }
+            
+            // Tema'yı yükle
+            const savedTheme = localStorage.getItem('dashboard-theme') || 'light';
+            applyTheme(savedTheme);
+            
+            // File upload'ı başlat
+            initializeFileUpload();
+            
+            // Erişim kontrolü
+            await checkAccess();
+            
+            console.log('✅ Dashboard hazır');
+        });
+
+        // Menü dışına tıklayınca kapat
+        document.addEventListener('click', function(e) {
+            const menuContainer = document.querySelector('.menu-container');
+            const settingsContainer = document.querySelector('.settings-container');
+            const menu = document.getElementById('dropdown-menu');
+            const settingsMenu = document.getElementById('settings-menu');
+            const menuBtn = document.getElementById('menu-btn');
+            const settingsBtn = document.getElementById('settings-btn');
+            
+            if (!menuContainer.contains(e.target)) {
+                menu.classList.remove('show');
+                menuBtn.classList.remove('active');
+            }
+            
+            if (!settingsContainer.contains(e.target)) {
+                settingsMenu.classList.remove('show');
+                settingsBtn.classList.remove('active');
+            }
+        });
+
+        // Verileri yenile - Akıllı versiyon
+        async function refreshData() {
+            const refreshBtn = document.getElementById('refresh-btn');
+            const originalText = refreshBtn.innerHTML;
+            
+            // Butonu loading durumuna getir
+            refreshBtn.innerHTML = '<span class="btn-icon spinning">🔄</span>Yenileniyor...';
+            refreshBtn.disabled = true;
+            
+            try {
+                // Eğer veri yüklüyse
+                if (appData && currentFileName) {
+                    console.log('🔄 Dosya yenileme işlemi başlatılıyor:', currentFileName);
+                    showToast('Veriler yenileniyor...', 'info');
+                    
+                    const fileInput = document.getElementById('file-input');
+                    
+                    // Önce mevcut file input'u kontrol et
+                    if (fileInput.files && fileInput.files[0]) {
+                        const currentFile = fileInput.files[0];
+                        
+                        // Dosya adı aynı mı kontrol et
+                        if (currentFile.name === currentFileName) {
+                            try {
+                                // Dosya değişmiş mi kontrol et
+                                if (currentFile.lastModified !== currentFileLastModified) {
+                                    console.log('📝 Dosya değişikliği tespit edildi, yeniden yükleniyor...');
+                                    await processFile(currentFile);
+                                    showToast('✅ Veriler başarıyla yenilendi!', 'success');
+                                    return;
+                                } else {
+                                    // Dosya değişmemiş, yine de yeniden yükle
+                                    console.log('🔄 Dosya zorla yeniden yükleniyor...');
+                                    await processFile(currentFile);
+                                    showToast('✅ Veriler yenilendi!', 'success');
+                                    return;
+                                }
+                            } catch (error) {
+                                console.warn('Dosya yeniden yüklenemedi:', error.message);
+                                // Hata durumunda devam et
+                            }
+                        }
+                    }
+                    
+                    // File input çalışmadıysa, kullanıcıya yardımcı mesaj göster
+                    showRefreshHelp();
+                    
+                } else {
+                    // İlk kez yükleme
+                    console.log('📁 İlk dosya yüklemesi');
+                    showToast('📁 Lütfen Excel dosyasını seçin', 'info');
+                    const fileInput = document.getElementById('file-input');
+                    fileInput.click();
+                }
+                
+            } catch (error) {
+                console.error('Refresh genel hatası:', error);
+                showToast('❌ Beklenmeyen hata oluştu!', 'error');
+            } finally {
+                // Butonu her durumda eski haline getir
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+            }
+        }
+
+        // Yenileme yardım mesajı göster
+        function showRefreshHelp() {
+            const modalContent = `
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <div class="personnel-avatar large">
+                            <span>🔄</span>
+                        </div>
+                        <div>
+                            <h2>Dosya Yenileme</h2>
+                            <p>Excel dosyasını güncellemek için</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="detail-section">
+                        <h3>📋 Kolay Yenileme Yöntemleri</h3>
+                        <div class="refresh-methods">
+                            <div class="method-card">
+                                <div class="method-icon">🖱️</div>
+                                <div class="method-content">
+                                    <h4>Sürükle & Bırak</h4>
+                                    <p>Excel dosyasını kaydedip kapattıktan sonra, dosyayı bu sayfaya sürükleyip bırakın</p>
+                                </div>
+                            </div>
+                            <div class="method-card">
+                                <div class="method-icon">📁</div>
+                                <div class="method-content">
+                                    <h4>Dosya Seç</h4>
+                                    <p>Aşağıdaki butona tıklayarak güncellenmiş dosyayı seçin</p>
+                                    <button class="btn btn-primary" onclick="closeModal(); document.getElementById('file-input').click();">
+                                        📁 Dosya Seç
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>💡 İpuçları</h3>
+                        <div class="tips-list">
+                            <div class="tip-item">
+                                <span class="tip-icon">✅</span>
+                                <span>Excel'de değişiklik yaptıktan sonra <strong>Ctrl+S</strong> ile kaydedin</span>
+                            </div>
+                            <div class="tip-item">
+                                <span class="tip-icon">✅</span>
+                                <span>Excel dosyasını <strong>tamamen kapatın</strong></span>
+                            </div>
+                            <div class="tip-item">
+                                <span class="tip-icon">✅</span>
+                                <span>Dosyayı bu sayfaya <strong>sürükleyip bırakın</strong></span>
+                            </div>
+                            <div class="tip-item">
+                                <span class="tip-icon">⚡</span>
+                                <span>Büyük dosyalar için <strong>CSV formatında kaydetmeyi</strong> deneyin</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>📊 Mevcut Dosya Bilgisi</h3>
+                        <div class="current-file-info">
+                            <div class="file-info-item">
+                                <span class="info-label">Dosya Adı:</span>
+                                <span class="info-value">${currentFileName || 'Bilinmiyor'}</span>
+                            </div>
+                            <div class="file-info-item">
+                                <span class="info-label">Personel Sayısı:</span>
+                                <span class="info-value">${appData ? appData.personnel.length : 0}</span>
+                            </div>
+                            <div class="file-info-item">
+                                <span class="info-label">Toplam İşlem:</span>
+                                <span class="info-value">${appData ? appData.totalTransactions.toLocaleString() : 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalContent);
+        }
+
+        // Toast notification göster
+        function showToast(message, type = 'info') {
+            // Mevcut toast'ları temizle
+            const existingToasts = document.querySelectorAll('.toast');
+            existingToasts.forEach(toast => toast.remove());
+            
+            // Yeni toast oluştur
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            
+            // Toast'ı sayfaya ekle
+            document.body.appendChild(toast);
+            
+            // Animasyon için kısa bir gecikme
+            setTimeout(() => {
+                toast.classList.add('toast-show');
+            }, 100);
+            
+            // 3 saniye sonra kaldır
+            setTimeout(() => {
+                toast.classList.remove('toast-show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Performans hesaplama bilgisini göster
+        function showPerformanceInfo() {
+            const modalContent = `
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <div class="personnel-avatar large">
+                            <span>📊</span>
+                        </div>
+                        <div>
+                            <h2>Performans Hesaplama Bilgisi</h2>
+                            <p>Performans skorları nasıl hesaplanır?</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="detail-section">
+                        <h3>Performans Skoru Kriterleri</h3>
+                        <div class="performance-criteria">
+                            <div class="criteria-item">
+                                <div class="criteria-icon">📊</div>
+                                <div class="criteria-content">
+                                    <h4>Miktar Bazlı</h4>
+                                    <p>Her 100 birim için +1 puan</p>
+                                </div>
+                            </div>
+                            <div class="criteria-item">
+                                <div class="criteria-icon">📦</div>
+                                <div class="criteria-content">
+                                    <h4>İşlem Bazlı</h4>
+                                    <p>Her işlem için +5 puan</p>
+                                </div>
+                            </div>
+                            <div class="criteria-item">
+                                <div class="criteria-icon">🎯</div>
+                                <div class="criteria-content">
+                                    <h4>Maksimum Sınır</h4>
+                                    <p>100 puan ile sınırlı</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Performans Seviyeleri</h3>
+                        <div class="performance-legend-modal">
+                            <div class="legend-item-modal excellent">
+                                <div class="legend-color-modal"></div>
+                                <div class="legend-content">
+                                    <h4>Mükemmel</h4>
+                                    <p>80% ve üzeri</p>
+                                </div>
+                            </div>
+                            <div class="legend-item-modal good">
+                                <div class="legend-color-modal"></div>
+                                <div class="legend-content">
+                                    <h4>İyi</h4>
+                                    <p>60% - 79%</p>
+                                </div>
+                            </div>
+                            <div class="legend-item-modal average">
+                                <div class="legend-color-modal"></div>
+                                <div class="legend-content">
+                                    <h4>Orta</h4>
+                                    <p>40% - 59%</p>
+                                </div>
+                            </div>
+                            <div class="legend-item-modal poor">
+                                <div class="legend-color-modal"></div>
+                                <div class="legend-content">
+                                    <h4>Düşük</h4>
+                                    <p>40% altı</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Hesaplama Örneği</h3>
+                        <div class="calculation-example">
+                            <div class="example-card">
+                                <h4>Örnek Personel</h4>
+                                <div class="example-data">
+                                    <div class="example-item">
+                                        <span class="example-label">Toplam Miktar:</span>
+                                        <span class="example-value">2,500 birim</span>
+                                    </div>
+                                    <div class="example-item">
+                                        <span class="example-label">Toplam İşlem:</span>
+                                        <span class="example-value">150 işlem</span>
+                                    </div>
+                                </div>
+                                <div class="calculation-steps">
+                                    <div class="step">
+                                        <span>Miktar Puanı: 2,500 ÷ 100 = 25 puan</span>
+                                    </div>
+                                    <div class="step">
+                                        <span>İşlem Puanı: 150 × 5 = 750 puan</span>
+                                    </div>
+                                    <div class="step">
+                                        <span>Toplam: 25 + 750 = 775 puan</span>
+                                    </div>
+                                    <div class="step final">
+                                        <span>Sonuç: Min(775, 100) = <strong>100%</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalContent);
+        }
+    </script>
+</body>
+</html>

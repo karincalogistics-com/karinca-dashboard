@@ -1,0 +1,16 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ana dış halka (siyah) -->
+  <circle cx="60" cy="60" r="50" fill="black"/>
+  
+  <!-- İç beyaz daire -->
+  <circle cx="60" cy="60" r="35" fill="white"/>
+  
+  <!-- Kırmızı merkez nokta -->
+  <circle cx="60" cy="60" r="8" fill="#E53E3E"/>
+  
+  <!-- Sağ taraftaki siyah çıkıntı -->
+  <circle cx="85" cy="60" r="12" fill="black"/>
+  
+  <!-- Alt kısımda KARINCA yazısı -->
+  <text x="60" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="black">KARINCA</text>
+</svg>
