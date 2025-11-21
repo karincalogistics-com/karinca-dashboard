@@ -25,30 +25,66 @@
     <!-- Login Screen -->
     <div class="login-screen" id="login-screen">
         <div class="login-container">
-            <div class="login-header">
-                <div class="login-logo">
-                    <img src="karinca-logo.svg" alt="Karınca Logo" style="width: 80px; height: 80px;">
-                    <h1>Performans Dashboard</h1>
-                    <p>Lütfen giriş yapın</p>
+            <div class="login-brand">
+                <div class="login-logo-wrapper">
+                    <img src="karinca-logo.svg" alt="Karınca Logo" class="login-logo-img">
                 </div>
+                <h1 class="login-title">Karınca Dashboard</h1>
+                <p class="login-subtitle">Performans Yönetim Sistemi</p>
             </div>
-            <div class="login-form-container">
-                <div class="form-group">
-                    <label for="login-email-input">Email Adresi</label>
-                    <input type="email" id="login-email-input" class="form-input" placeholder="ornek@email.com" />
+            
+            <div class="login-card">
+                <div class="login-card-header">
+                    <h2>Hoş Geldiniz</h2>
+                    <p>Devam etmek için giriş yapın</p>
                 </div>
-                <div class="form-group">
-                    <label for="login-password-input">Şifre</label>
-                    <input type="password" id="login-password-input" class="form-input" placeholder="••••••••" />
-                </div>
-                <div class="form-actions">
-                    <button class="btn btn-primary btn-login" onclick="performLogin()">
-                        🔑 Giriş Yap
+                
+                <div class="login-form">
+                    <div class="input-group">
+                        <label for="login-email-input" class="input-label">
+                            <span class="label-icon">📧</span>
+                            <span class="label-text">Email Adresi</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            id="login-email-input" 
+                            class="input-field" 
+                            placeholder="ornek@karincalogistics.com"
+                            autocomplete="email"
+                        />
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="login-password-input" class="input-label">
+                            <span class="label-icon">🔒</span>
+                            <span class="label-text">Şifre</span>
+                        </label>
+                        <input 
+                            type="password" 
+                            id="login-password-input" 
+                            class="input-field" 
+                            placeholder="••••••••"
+                            autocomplete="current-password"
+                        />
+                    </div>
+                    
+                    <button class="login-btn" onclick="performLogin()">
+                        <span class="btn-text">Giriş Yap</span>
+                        <span class="btn-icon-right">→</span>
                     </button>
                 </div>
-                <div class="login-info">
-                    <p><strong>ℹ️ Bilgi:</strong> Sadece yetkili email adresleri erişebilir.</p>
-                    <p><strong>🔑 İlk Giriş:</strong> Şifrenizi oluşturmak için admin ile iletişime geçin.</p>
+                
+                <div class="login-footer">
+                    <div class="info-box">
+                        <div class="info-item">
+                            <span class="info-icon">ℹ️</span>
+                            <span class="info-text">Sadece yetkili kullanıcılar erişebilir</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">🔑</span>
+                            <span class="info-text">İlk giriş için admin ile iletişime geçin</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
