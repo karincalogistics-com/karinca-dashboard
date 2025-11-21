@@ -25,66 +25,47 @@
     <!-- Login Screen -->
     <div class="login-screen" id="login-screen">
         <div class="login-container">
-            <div class="login-brand">
-                <div class="login-logo-wrapper">
-                    <img src="karinca-logo.svg" alt="Karınca Logo" class="login-logo-img">
-                </div>
-                <h1 class="login-title">Karınca Dashboard</h1>
-                <p class="login-subtitle">Performans Yönetim Sistemi</p>
+            <div class="login-header">
+                <img src="karinca-logo.svg" alt="Karınca Logo" class="login-logo">
+                <h1>Karınca Logistics</h1>
+                <p>Performans Dashboard</p>
             </div>
             
-            <div class="login-card">
-                <div class="login-card-header">
-                    <h2>Hoş Geldiniz</h2>
-                    <p>Devam etmek için giriş yapın</p>
-                </div>
+            <div class="login-box">
+                <h2>Giriş Yap</h2>
                 
-                <div class="login-form">
-                    <div class="input-group">
-                        <label for="login-email-input" class="input-label">
-                            <span class="label-icon">📧</span>
-                            <span class="label-text">Email Adresi</span>
-                        </label>
+                <form class="login-form" onsubmit="event.preventDefault(); performLogin();">
+                    <div class="form-group">
+                        <label for="login-email-input">Email</label>
                         <input 
                             type="email" 
                             id="login-email-input" 
-                            class="input-field" 
-                            placeholder="ornek@karincalogistics.com"
+                            class="form-control" 
+                            placeholder="email@karincalogistics.com"
                             autocomplete="email"
+                            required
                         />
                     </div>
                     
-                    <div class="input-group">
-                        <label for="login-password-input" class="input-label">
-                            <span class="label-icon">🔒</span>
-                            <span class="label-text">Şifre</span>
-                        </label>
+                    <div class="form-group">
+                        <label for="login-password-input">Şifre</label>
                         <input 
                             type="password" 
                             id="login-password-input" 
-                            class="input-field" 
-                            placeholder="••••••••"
+                            class="form-control" 
+                            placeholder="Şifrenizi girin"
                             autocomplete="current-password"
+                            required
                         />
                     </div>
                     
-                    <button class="login-btn" onclick="performLogin()">
-                        <span class="btn-text">Giriş Yap</span>
-                        <span class="btn-icon-right">→</span>
+                    <button type="submit" class="btn-login">
+                        Giriş Yap
                     </button>
-                </div>
+                </form>
                 
-                <div class="login-footer">
-                    <div class="info-box">
-                        <div class="info-item">
-                            <span class="info-icon">ℹ️</span>
-                            <span class="info-text">Sadece yetkili kullanıcılar erişebilir</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-icon">🔑</span>
-                            <span class="info-text">İlk giriş için admin ile iletişime geçin</span>
-                        </div>
-                    </div>
+                <div class="login-info">
+                    <p>Sadece yetkili kullanıcılar erişebilir</p>
                 </div>
             </div>
         </div>
