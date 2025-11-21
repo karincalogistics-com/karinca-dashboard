@@ -3142,3 +3142,183 @@ min Panel Styles */
 .btn-danger:active {
     transform: translateY(0);
 }
+
+
+/* ============================================
+   CLEAN USER CARDS - SIMPLE & PROFESSIONAL
+   ============================================ */
+
+.user-card-clean {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.user-card-clean:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-color: var(--primary-color);
+}
+
+.user-card-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.user-avatar-clean {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.admin-avatar-clean {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.normal-avatar-clean {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.user-info-clean {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-email-clean {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-role-clean {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.user-card-right {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn-clean {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-icon-clean {
+    font-size: 1.1rem;
+}
+
+.btn-text-clean {
+    font-size: 0.9rem;
+}
+
+.btn-reset-clean {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-reset-clean:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-delete-clean {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-delete-clean:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.protected-label-clean {
+    padding: 0.65rem 1.25rem;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #16a34a;
+    white-space: nowrap;
+}
+
+/* Dark Theme */
+.theme-dark .user-card-clean {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.theme-dark .user-card-clean:hover {
+    border-color: #3b82f6;
+}
+
+.theme-dark .user-email-clean {
+    color: #f1f5f9;
+}
+
+.theme-dark .user-role-clean {
+    color: #94a3b8;
+}
+
+.theme-dark .protected-label-clean {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .user-card-clean {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .user-card-left {
+        width: 100%;
+    }
+    
+    .user-card-right {
+        width: 100%;
+        justify-content: stretch;
+    }
+    
+    .btn-clean {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .protected-label-clean {
+        text-align: center;
+    }
+}

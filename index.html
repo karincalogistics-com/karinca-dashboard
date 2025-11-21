@@ -2016,23 +2016,25 @@
                             <h3>👑 Anahtar Kullanıcılar (${adminEmails.length})</h3>
                             <div class="users-list">
                                 ${adminEmails.map(email => `
-                                    <div class="user-item admin-user-item">
-                                        <div class="user-info">
-                                            <span class="user-icon">👑</span>
-                                            <div class="user-details">
-                                                <span class="user-email">${email}</span>
-                                                ${email === ADMIN_EMAIL ? '<span class="user-badge">Ana Anahtar</span>' : '<span class="user-badge">Anahtar</span>'}
+                                    <div class="user-card-clean">
+                                        <div class="user-card-left">
+                                            <div class="user-avatar-clean admin-avatar-clean">👑</div>
+                                            <div class="user-info-clean">
+                                                <div class="user-email-clean">${email}</div>
+                                                <div class="user-role-clean">${email === ADMIN_EMAIL ? '🛡️ Ana Anahtar Kullanıcı' : '👑 Anahtar Kullanıcı'}</div>
                                             </div>
                                         </div>
-                                        <div class="user-actions">
-                                            <button class="btn-action btn-reset-password" onclick="sendPasswordResetEmail('${email}')" title="Şifre Sıfırlama Email'i Gönder">
-                                                🔑
+                                        <div class="user-card-right">
+                                            <button class="btn-clean btn-reset-clean" onclick="sendPasswordResetEmail('${email}')">
+                                                <span class="btn-icon-clean">🔑</span>
+                                                <span class="btn-text-clean">Şifre Sıfırla</span>
                                             </button>
                                             ${email !== ADMIN_EMAIL ? `
-                                                <button class="btn-remove" onclick="removeAdmin('${email}')" title="Anahtar Yetkisini Kaldır">
-                                                    🗑️
+                                                <button class="btn-clean btn-delete-clean" onclick="removeAdmin('${email}')">
+                                                    <span class="btn-icon-clean">🗑️</span>
+                                                    <span class="btn-text-clean">Sil</span>
                                                 </button>
-                                            ` : '<span class="protected-badge" style="margin-left: 0.5rem;">🛡️ Korumalı</span>'}
+                                            ` : '<div class="protected-label-clean">🔒 Korumalı</div>'}
                                         </div>
                                     </div>
                                 `).join('')}
@@ -2045,20 +2047,22 @@
                                 ${authorizedEmails.length === 0 ? 
                                     '<div class="no-users">Henüz normal kullanıcı eklenmemiş</div>' :
                                     authorizedEmails.map(email => `
-                                        <div class="user-item">
-                                            <div class="user-info">
-                                                <span class="user-icon">👤</span>
-                                                <div class="user-details">
-                                                    <span class="user-email">${email}</span>
-                                                    <span class="user-badge normal-badge">Normal</span>
+                                        <div class="user-card-clean">
+                                            <div class="user-card-left">
+                                                <div class="user-avatar-clean normal-avatar-clean">👤</div>
+                                                <div class="user-info-clean">
+                                                    <div class="user-email-clean">${email}</div>
+                                                    <div class="user-role-clean">👤 Normal Kullanıcı</div>
                                                 </div>
                                             </div>
-                                            <div class="user-actions">
-                                                <button class="btn-action btn-reset-password" onclick="sendPasswordResetEmail('${email}')" title="Şifre Sıfırlama Email'i Gönder">
-                                                    🔑
+                                            <div class="user-card-right">
+                                                <button class="btn-clean btn-reset-clean" onclick="sendPasswordResetEmail('${email}')">
+                                                    <span class="btn-icon-clean">🔑</span>
+                                                    <span class="btn-text-clean">Şifre Sıfırla</span>
                                                 </button>
-                                                <button class="btn-remove" onclick="removeUser('${email}')" title="Yetkiyi Kaldır">
-                                                    🗑️
+                                                <button class="btn-clean btn-delete-clean" onclick="removeUser('${email}')">
+                                                    <span class="btn-icon-clean">🗑️</span>
+                                                    <span class="btn-text-clean">Sil</span>
                                                 </button>
                                             </div>
                                         </div>
