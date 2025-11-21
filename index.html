@@ -1937,10 +1937,13 @@
                 // Şifreyi değiştir
                 await user.updatePassword(newPassword);
                 
-                showToast('✅ Şifreniz başarıyla değiştirildi!', 'success');
-                
                 // Modal'ı kapat
                 closeModal();
+                
+                // Başarı mesajını modal kapandıktan sonra göster
+                setTimeout(() => {
+                    showToast('✅ Şifreniz başarıyla değiştirildi!', 'success');
+                }, 100);
                 
             } catch (error) {
                 console.error('Şifre değiştirme hatası:', error);
