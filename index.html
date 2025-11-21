@@ -23,62 +23,27 @@
 <body>
     <!-- Login Screen -->
     <div class="login-screen" id="login-screen">
-        <div class="login-background">
-            <div class="login-pattern"></div>
-        </div>
         <div class="login-container">
-            <div class="login-card">
-                <div class="login-header">
-                    <div class="login-logo-wrapper">
-                        <div class="logo-circle">
-                            <img src="karinca-logo.svg" alt="Karınca Logo" class="login-logo-img">
-                        </div>
-                        <h1 class="login-title">Karınca Logistics</h1>
-                        <p class="login-subtitle">Performans Dashboard</p>
-                    </div>
+            <div class="login-header">
+                <div class="login-logo">
+                    <img src="karinca-logo.svg" alt="Karınca Logo" style="width: 80px; height: 80px;">
+                    <h1>Performans Dashboard</h1>
+                    <p>Lütfen giriş yapın</p>
                 </div>
-                <div class="login-body">
-                    <div class="welcome-text">
-                        <h2>Hoş Geldiniz</h2>
-                        <p>Devam etmek için lütfen giriş yapın</p>
-                    </div>
-                    <div class="login-form">
-                        <div class="form-group">
-                            <label for="login-email-input" class="form-label">
-                                <span class="label-icon">📧</span>
-                                Email Adresi
-                            </label>
-                            <div class="input-wrapper">
-                                <input 
-                                    type="email" 
-                                    id="login-email-input" 
-                                    class="form-input" 
-                                    placeholder="ornek@karincalogistics.com"
-                                    autocomplete="email"
-                                />
-                            </div>
-                        </div>
-                        <button class="btn-login-modern" onclick="performLogin()">
-                            <span class="btn-content">
-                                <span class="btn-icon">🔑</span>
-                                <span class="btn-text">Giriş Yap</span>
-                            </span>
-                            <span class="btn-arrow">→</span>
-                        </button>
-                    </div>
-                    <div class="login-footer">
-                        <div class="info-card">
-                            <div class="info-icon">🔒</div>
-                            <div class="info-content">
-                                <p class="info-title">Güvenli Erişim</p>
-                                <p class="info-text">Sadece yetkili kullanıcılar erişebilir</p>
-                            </div>
-                        </div>
-                        <div class="admin-info">
-                            <span class="admin-badge">👑 Admin</span>
-                            <span class="admin-email">huseyin.kilic@karincalogistics.com</span>
-                        </div>
-                    </div>
+            </div>
+            <div class="login-form-container">
+                <div class="form-group">
+                    <label for="login-email-input">Email Adresi</label>
+                    <input type="email" id="login-email-input" class="form-input" placeholder="ornek@email.com" />
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary btn-login" onclick="performLogin()">
+                        🔑 Giriş Yap
+                    </button>
+                </div>
+                <div class="login-info">
+                    <p><strong>ℹ️ Bilgi:</strong> Sadece yetkili email adresleri erişebilir.</p>
+                    <p><strong>🔑 Anahtar Kullanıcı:</strong> huseyin.kilic@karincalogistics.com</p>
                 </div>
             </div>
         </div>
@@ -1856,156 +1821,98 @@
             const adminEmails = await getAdminEmails();
             
             const modalContent = `
-                <div class="modal-header admin-modal-header">
+                <div class="modal-header">
                     <div class="modal-title">
-                        <div class="admin-header-icon">
-                            <div class="icon-circle">
-                                <span>👑</span>
-                            </div>
+                        <div class="personnel-avatar large">
+                            <span>👑</span>
                         </div>
-                        <div class="admin-header-text">
+                        <div>
                             <h2>Yetkilendirme Paneli</h2>
-                            <p>Kullanıcı erişim yönetimi ve yetkilendirme</p>
+                            <p>Kullanıcı yetkilendirme yönetimi</p>
                         </div>
                     </div>
                     <button class="modal-close" onclick="closeModal()">&times;</button>
                 </div>
                 
-                <div class="modal-body admin-modal-body">
-                    <div class="admin-panel-modern">
-                        <!-- Admin Kullanıcı Ekle -->
-                        <div class="admin-card admin-add-card">
-                            <div class="card-header">
-                                <div class="card-icon admin-icon">👑</div>
-                                <div class="card-title">
-                                    <h3>Anahtar Kullanıcı Ekle</h3>
-                                    <p>Tam yetki ile yönetici erişimi</p>
-                                </div>
+                <div class="modal-body">
+                    <div class="admin-panel">
+                        <div class="add-user-section">
+                            <h3>👑 Anahtar Kullanıcı Ekle</h3>
+                            <div class="form-group">
+                                <input type="email" id="new-admin-input" class="form-input" placeholder="anahtar.kullanici@email.com" />
+                                <button class="btn btn-primary" onclick="addNewAdmin()">
+                                    👑 Anahtar Kullanıcı Yap
+                                </button>
                             </div>
-                            <div class="card-body">
-                                <div class="input-group-modern">
-                                    <div class="input-icon">📧</div>
-                                    <input type="email" id="new-admin-input" class="form-input-modern" placeholder="anahtar.kullanici@karincalogistics.com" />
-                                    <button class="btn-modern btn-admin" onclick="addNewAdmin()">
-                                        <span>Ekle</span>
-                                        <span class="btn-icon-right">→</span>
-                                    </button>
-                                </div>
-                                <div class="info-box warning-box">
-                                    <span class="info-icon">⚠️</span>
-                                    <span class="info-text">Anahtar kullanıcılar tüm yetkilendirme işlemlerini yapabilir</span>
-                                </div>
+                            <small style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                                ⚠️ Anahtar kullanıcılar yetkilendirme paneline erişebilir ve diğer kullanıcıları yönetebilir.
+                            </small>
+                        </div>
+                        
+                        <div class="add-user-section">
+                            <h3>👤 Normal Kullanıcı Ekle</h3>
+                            <div class="form-group">
+                                <input type="email" id="new-user-input" class="form-input" placeholder="kullanici@email.com" />
+                                <button class="btn btn-secondary" onclick="addNewUser()">
+                                    ➕ Yetki Ver
+                                </button>
                             </div>
                         </div>
                         
-                        <!-- Normal Kullanıcı Ekle -->
-                        <div class="admin-card user-add-card">
-                            <div class="card-header">
-                                <div class="card-icon user-icon">👤</div>
-                                <div class="card-title">
-                                    <h3>Normal Kullanıcı Ekle</h3>
-                                    <p>Standart kullanıcı erişimi</p>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="input-group-modern">
-                                    <div class="input-icon">📧</div>
-                                    <input type="email" id="new-user-input" class="form-input-modern" placeholder="kullanici@karincalogistics.com" />
-                                    <button class="btn-modern btn-user" onclick="addNewUser()">
-                                        <span>Ekle</span>
-                                        <span class="btn-icon-right">→</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Anahtar Kullanıcılar Listesi -->
-                        <div class="admin-card users-list-card">
-                            <div class="card-header">
-                                <div class="card-title-with-count">
-                                    <h3>👑 Anahtar Kullanıcılar</h3>
-                                    <span class="count-badge admin-count">${adminEmails.length}</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="users-grid">
-                                    ${adminEmails.map(email => `
-                                        <div class="user-card admin-user-card">
-                                            <div class="user-card-header">
-                                                <div class="user-avatar admin-avatar">👑</div>
-                                                <div class="user-card-info">
-                                                    <div class="user-email-text">${email}</div>
-                                                    <div class="user-role-badge ${email === ADMIN_EMAIL ? 'master-badge' : 'admin-badge'}">
-                                                        ${email === ADMIN_EMAIL ? '🛡️ Ana Anahtar' : '👑 Anahtar'}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="user-card-actions">
-                                                ${email !== ADMIN_EMAIL ? `
-                                                    <button class="btn-action btn-remove-modern" onclick="removeAdmin('${email}')" title="Yetkiyi Kaldır">
-                                                        <span>🗑️</span>
-                                                    </button>
-                                                ` : '<div class="protected-label">🔒 Korumalı</div>'}
+                        <div class="users-section">
+                            <h3>👑 Anahtar Kullanıcılar (${adminEmails.length})</h3>
+                            <div class="users-list">
+                                ${adminEmails.map(email => `
+                                    <div class="user-item admin-user-item">
+                                        <div class="user-info">
+                                            <span class="user-icon">👑</span>
+                                            <div class="user-details">
+                                                <span class="user-email">${email}</span>
+                                                ${email === ADMIN_EMAIL ? '<span class="user-badge">Ana Anahtar</span>' : '<span class="user-badge">Anahtar</span>'}
                                             </div>
                                         </div>
-                                    `).join('')}
-                                </div>
+                                        ${email !== ADMIN_EMAIL ? `
+                                            <button class="btn-remove" onclick="removeAdmin('${email}')" title="Anahtar Yetkisini Kaldır">
+                                                🗑️
+                                            </button>
+                                        ` : '<span class="protected-badge">🛡️ Korumalı</span>'}
+                                    </div>
+                                `).join('')}
                             </div>
                         </div>
                         
-                        <!-- Normal Kullanıcılar Listesi -->
-                        <div class="admin-card users-list-card">
-                            <div class="card-header">
-                                <div class="card-title-with-count">
-                                    <h3>👤 Normal Kullanıcılar</h3>
-                                    <span class="count-badge user-count">${authorizedEmails.length}</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
+                        <div class="users-section">
+                            <h3>👤 Normal Kullanıcılar (${authorizedEmails.length})</h3>
+                            <div class="users-list">
                                 ${authorizedEmails.length === 0 ? 
-                                    '<div class="empty-state"><div class="empty-icon">📭</div><p>Henüz normal kullanıcı eklenmemiş</p></div>' :
-                                    `<div class="users-grid">
-                                        ${authorizedEmails.map(email => `
-                                            <div class="user-card normal-user-card">
-                                                <div class="user-card-header">
-                                                    <div class="user-avatar normal-avatar">👤</div>
-                                                    <div class="user-card-info">
-                                                        <div class="user-email-text">${email}</div>
-                                                        <div class="user-role-badge normal-badge">👤 Kullanıcı</div>
-                                                    </div>
-                                                </div>
-                                                <div class="user-card-actions">
-                                                    <button class="btn-action btn-remove-modern" onclick="removeUser('${email}')" title="Yetkiyi Kaldır">
-                                                        <span>🗑️</span>
-                                                    </button>
+                                    '<div class="no-users">Henüz normal kullanıcı eklenmemiş</div>' :
+                                    authorizedEmails.map(email => `
+                                        <div class="user-item">
+                                            <div class="user-info">
+                                                <span class="user-icon">👤</span>
+                                                <div class="user-details">
+                                                    <span class="user-email">${email}</span>
+                                                    <span class="user-badge normal-badge">Normal</span>
                                                 </div>
                                             </div>
-                                        `).join('')}
-                                    </div>`
+                                            <button class="btn-remove" onclick="removeUser('${email}')" title="Yetkiyi Kaldır">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    `).join('')
                                 }
                             </div>
                         </div>
                         
-                        <!-- Tehlikeli Bölge -->
-                        <div class="admin-card danger-card">
-                            <div class="card-header">
-                                <div class="card-icon danger-icon">⚠️</div>
-                                <div class="card-title">
-                                    <h3>Tehlikeli Bölge</h3>
-                                    <p>Dikkatli kullanın - Geri alınamaz işlemler</p>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="danger-content">
-                                    <div class="danger-warning">
-                                        <span class="danger-warning-icon">🚨</span>
-                                        <p>Veritabanını sıfırlamak <strong>TÜM kullanıcı yetkilerini</strong> kalıcı olarak silecektir. Bu işlem geri alınamaz!</p>
-                                    </div>
-                                    <button class="btn-modern btn-danger-modern" onclick="resetDatabase()">
-                                        <span class="btn-icon-left">🗑️</span>
-                                        <span>Veritabanını Sıfırla</span>
-                                    </button>
-                                </div>
+                        <div class="danger-zone-section">
+                            <h3>⚠️ Tehlikeli Bölge</h3>
+                            <div class="danger-zone-content">
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+                                    Veritabanını sıfırlamak TÜM kullanıcı yetkilerini silecektir. Bu işlem geri alınamaz!
+                                </p>
+                                <button class="btn btn-danger" onclick="resetDatabase()" style="background: #dc3545;">
+                                    🗑️ Veritabanını Sıfırla
+                                </button>
                             </div>
                         </div>
                     </div>
