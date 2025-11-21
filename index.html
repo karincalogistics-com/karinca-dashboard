@@ -24,48 +24,48 @@
 <body>
     <!-- Login Screen -->
     <div class="login-screen" id="login-screen">
-        <div class="login-container">
-            <div class="login-header">
-                <img src="karinca-logo.svg" alt="Karınca Logo" class="login-logo">
-                <h1>Karınca Logistics</h1>
-                <p>Performans Dashboard</p>
-            </div>
-            
-            <div class="login-box">
-                <h2>Giriş Yap</h2>
+        <div class="login-wrapper">
+            <div class="login-card-modern">
+                <div class="login-header-modern">
+                    <div class="logo-circle">
+                        <img src="karinca-logo.svg" alt="Karınca Logo" class="logo-img">
+                    </div>
+                    <h1>Karınca Logistics</h1>
+                    <p>Performans Dashboard</p>
+                </div>
                 
-                <form class="login-form" onsubmit="event.preventDefault(); performLogin();">
-                    <div class="form-group">
-                        <label for="login-email-input">Email</label>
+                <form class="login-form-modern" onsubmit="event.preventDefault(); performLogin();">
+                    <div class="input-wrapper">
+                        <div class="input-icon">👤</div>
                         <input 
                             type="email" 
                             id="login-email-input" 
-                            class="form-control" 
-                            placeholder="email@karincalogistics.com"
+                            class="input-modern" 
+                            placeholder="Email"
                             autocomplete="email"
                             required
                         />
                     </div>
                     
-                    <div class="form-group">
-                        <label for="login-password-input">Şifre</label>
+                    <div class="input-wrapper">
+                        <div class="input-icon">🔒</div>
                         <input 
                             type="password" 
                             id="login-password-input" 
-                            class="form-control" 
-                            placeholder="Şifrenizi girin"
+                            class="input-modern" 
+                            placeholder="Şifre"
                             autocomplete="current-password"
                             required
                         />
                     </div>
                     
-                    <button type="submit" class="btn-login">
+                    <button type="submit" class="btn-modern">
                         Giriş Yap
                     </button>
                 </form>
                 
-                <div class="login-info">
-                    <p>Sadece yetkili kullanıcılar erişebilir</p>
+                <div class="login-footer-modern">
+                    <p>🔐 Sadece yetkili kullanıcılar erişebilir</p>
                 </div>
             </div>
         </div>
