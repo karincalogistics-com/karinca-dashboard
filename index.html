@@ -2015,26 +2015,25 @@
                         <div class="users-section">
                             <h3>👑 Anahtar Kullanıcılar (${adminEmails.length})</h3>
                             <div class="users-list">
-                                ${adminEmails.map(email => `
-                                    <div class="user-card-clean">
-                                        <div class="user-card-left">
-                                            <div class="user-avatar-clean admin-avatar-clean">👑</div>
-                                            <div class="user-info-clean">
-                                                <div class="user-email-clean">${email}</div>
-                                                <div class="user-role-clean">${email === ADMIN_EMAIL ? '🛡️ Ana Anahtar Kullanıcı' : '👑 Anahtar Kullanıcı'}</div>
+                                ${adminEmails.map((email, index) => `
+                                    <div class="user-list-item" onclick="toggleUserActions('admin-${index}')">
+                                        <div class="user-list-main">
+                                            <span class="user-list-icon">👑</span>
+                                            <div class="user-list-info">
+                                                <div class="user-list-email">${email}</div>
+                                                <div class="user-list-role">${email === ADMIN_EMAIL ? 'Ana Anahtar' : 'Anahtar'}</div>
                                             </div>
+                                            <span class="user-list-arrow">▼</span>
                                         </div>
-                                        <div class="user-card-right">
-                                            <button class="btn-clean btn-reset-clean" onclick="sendPasswordResetEmail('${email}')">
-                                                <span class="btn-icon-clean">🔑</span>
-                                                <span class="btn-text-clean">Şifre Sıfırla</span>
+                                        <div class="user-list-actions" id="admin-${index}" style="display: none;">
+                                            <button class="action-btn action-btn-reset" onclick="event.stopPropagation(); sendPasswordResetEmail('${email}')">
+                                                🔑 Şifre Sıfırlama Email'i Gönder
                                             </button>
                                             ${email !== ADMIN_EMAIL ? `
-                                                <button class="btn-clean btn-delete-clean" onclick="removeAdmin('${email}')">
-                                                    <span class="btn-icon-clean">🗑️</span>
-                                                    <span class="btn-text-clean">Sil</span>
+                                                <button class="action-btn action-btn-delete" onclick="event.stopPropagation(); removeAdmin('${email}')">
+                                                    🗑️ Anahtar Yetkisini Kaldır
                                                 </button>
-                                            ` : '<div class="protected-label-clean">🔒 Korumalı</div>'}
+                                            ` : '<div class="action-protected">🔒 Bu kullanıcı korumalıdır</div>'}
                                         </div>
                                     </div>
                                 `).join('')}
@@ -2046,23 +2045,22 @@
                             <div class="users-list">
                                 ${authorizedEmails.length === 0 ? 
                                     '<div class="no-users">Henüz normal kullanıcı eklenmemiş</div>' :
-                                    authorizedEmails.map(email => `
-                                        <div class="user-card-clean">
-                                            <div class="user-card-left">
-                                                <div class="user-avatar-clean normal-avatar-clean">👤</div>
-                                                <div class="user-info-clean">
-                                                    <div class="user-email-clean">${email}</div>
-                                                    <div class="user-role-clean">👤 Normal Kullanıcı</div>
+                                    authorizedEmails.map((email, index) => `
+                                        <div class="user-list-item" onclick="toggleUserActions('user-${index}')">
+                                            <div class="user-list-main">
+                                                <span class="user-list-icon">👤</span>
+                                                <div class="user-list-info">
+                                                    <div class="user-list-email">${email}</div>
+                                                    <div class="user-list-role">Normal Kullanıcı</div>
                                                 </div>
+                                                <span class="user-list-arrow">▼</span>
                                             </div>
-                                            <div class="user-card-right">
-                                                <button class="btn-clean btn-reset-clean" onclick="sendPasswordResetEmail('${email}')">
-                                                    <span class="btn-icon-clean">🔑</span>
-                                                    <span class="btn-text-clean">Şifre Sıfırla</span>
+                                            <div class="user-list-actions" id="user-${index}" style="display: none;">
+                                                <button class="action-btn action-btn-reset" onclick="event.stopPropagation(); sendPasswordResetEmail('${email}')">
+                                                    🔑 Şifre Sıfırlama Email'i Gönder
                                                 </button>
-                                                <button class="btn-clean btn-delete-clean" onclick="removeUser('${email}')">
-                                                    <span class="btn-icon-clean">🗑️</span>
-                                                    <span class="btn-text-clean">Sil</span>
+                                                <button class="action-btn action-btn-delete" onclick="event.stopPropagation(); removeUser('${email}')">
+                                                    🗑️ Yetkiyi Kaldır
                                                 </button>
                                             </div>
                                         </div>
@@ -2194,6 +2192,20 @@
                 } else {
                     showToast('❌ Bir hata oluştu', 'error');
                 }
+            }
+        }
+
+        // Kullanıcı aksiyonlarını aç/kapat
+        function toggleUserActions(id) {
+            const element = document.getElementById(id);
+            const arrow = element.previousElementSibling.querySelector('.user-list-arrow');
+            
+            if (element.style.display === 'none') {
+                element.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                element.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
             }
         }
 

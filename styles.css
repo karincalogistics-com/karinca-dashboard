@@ -3145,6 +3145,123 @@ min Panel Styles */
 
 
 /* ============================================
+   USER LIST - SIMPLE DROPDOWN STYLE
+   ============================================ */
+
+.user-list-item {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.user-list-item:hover {
+    border-color: var(--primary-color);
+}
+
+.user-list-main {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+    gap: 0.75rem;
+}
+
+.user-list-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    text-align: center;
+}
+
+.user-list-info {
+    flex: 1;
+}
+
+.user-list-email {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.user-list-role {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.15rem;
+}
+
+.user-list-arrow {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+}
+
+.user-list-actions {
+    padding: 0 1rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.action-btn-reset {
+    background: #3b82f6;
+    color: white;
+}
+
+.action-btn-reset:hover {
+    background: #2563eb;
+}
+
+.action-btn-delete {
+    background: #ef4444;
+    color: white;
+}
+
+.action-btn-delete:hover {
+    background: #dc2626;
+}
+
+.action-protected {
+    padding: 0.75rem;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #16a34a;
+    text-align: center;
+}
+
+/* Dark Theme */
+.theme-dark .user-list-item {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.theme-dark .user-list-email {
+    color: #f1f5f9;
+}
+
+.theme-dark .user-list-role {
+    color: #94a3b8;
+}
+
+.theme-dark .action-protected {
+    background: rgba(34, 197, 94, 0.15);
+}
+
+/* ============================================
    CLEAN USER CARDS - SIMPLE & PROFESSIONAL
    ============================================ */
 
