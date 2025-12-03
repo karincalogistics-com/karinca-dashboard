@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Veri Çekme Testi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input[type="url"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .info {
+            background: #e7f3ff;
+            border: 2px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #004085;
+        }
+        
+        .example {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 GitHub Veri Çekme Testi</h1>
+        <p class="subtitle">GitHub'dan Excel dosyası çekme özelliğini test edin</p>
+        
+        <div class="info">
+            <strong>💡 Nasıl Kullanılır:</strong><br>
+            1. Excel dosyanızı GitHub'a yükleyin<br>
+            2. Dosyaya tıklayıp "Raw" butonuna basın<br>
+            3. URL'i aşağıya yapıştırın<br>
+            4. "Test Et" butonuna tıklayın
+            
+            <div class="example">
+                Örnek: https://raw.githubusercontent.com/user/repo/main/data.xlsx
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label for="github-url">GitHub Raw URL:</label>
+            <input 
+                type="url" 
+                id="github-url" 
+                placeholder="https://raw.githubusercontent.com/..."
+            />
+        </div>
+        
+        <button class="btn" onclick="testFetch()">
+            📥 Test Et
+        </button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Dosya çekiliyor...</p>
+        </div>
+        
+        <div class="result" id="result"></div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        async function testFetch() {
+            const url = document.getElementById('github-url').value.trim();
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            // Temizle
+            result.className = 'result';
+            result.innerHTML = '';
+            
+            if (!url) {
+                showResult('error', '❌ Lütfen bir URL girin');
+                return;
+            }
+            
+            if (!url.includes('github')) {
+                showResult('error', '❌ Geçerli bir GitHub URL\'i girin');
+                return;
+            }
+            
+            // Loading göster
+            loading.classList.add('show');
+            
+            try {
+                // Raw URL'e çevir
+                const rawUrl = convertToRawUrl(url);
+                console.log('Çekiliyor:', rawUrl);
+                
+                // Fetch
+                const response = await fetch(rawUrl, {
+                    cache: 'no-cache'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const blob = await response.blob();
+                
+                if (blob.size === 0) {
+                    throw new Error('Dosya boş');
+                }
+                
+                // Excel'i parse et
+                const arrayBuffer = await blob.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                // Başarı
+                showResult('success', `
+                    ✅ <strong>Başarılı!</strong><br><br>
+                    📄 Dosya boyutu: ${(blob.size / 1024).toFixed(2)} KB<br>
+                    📊 Sayfa sayısı: ${workbook.SheetNames.length}<br>
+                    📋 İlk sayfa: ${sheetName}<br>
+                    📝 Satır sayısı: ${data.length}<br>
+                    📝 Kolon sayısı: ${data[0]?.length || 0}<br><br>
+                    <strong>İlk 3 satır:</strong><br>
+                    <div class="example">${JSON.stringify(data.slice(0, 3), null, 2)}</div>
+                `);
+                
+            } catch (error) {
+                console.error('Hata:', error);
+                showResult('error', `
+                    ❌ <strong>Hata!</strong><br><br>
+                    ${error.message}<br><br>
+                    <strong>Kontrol Listesi:</strong><br>
+                    • URL "raw.githubusercontent.com" içeriyor mu?<br>
+                    • Repository public mi?<br>
+                    • Dosya gerçekten var mı?<br>
+                    • İnternet bağlantınız var mı?
+                `);
+            } finally {
+                loading.classList.remove('show');
+            }
+        }
+        
+        function convertToRawUrl(url) {
+            if (url.includes('raw.githubusercontent.com')) {
+                return url;
+            }
+            
+            if (url.includes('github.com')) {
+                return url
+                    .replace('github.com', 'raw.githubusercontent.com')
+                    .replace('/blob/', '/');
+            }
+            
+            return url;
+        }
+        
+        function showResult(type, message) {
+            const result = document.getElementById('result');
+            result.className = `result ${type} show`;
+            result.innerHTML = message;
+        }
+    </script>
+</body>
+</html>

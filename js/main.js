@@ -363,7 +363,7 @@ function updateDashboard() {
         updateKPIs(processedData);
         
         // Personel grid'ini güncelle
-        console.log('📊 Personel grid'i güncelleniyor...');
+        console.log('📊 Personel gridi güncelleniyor...');
         updatePersonnelGrid(processedData.personnel);
         
         // Sidebar'ı güncelle
@@ -1648,3 +1648,109 @@ function toggleDebug() {
         alert('DebugHelper yüklenmedi! Sayfayı yenileyin.');
     }
 }
+
+// ===== GitHub Ayarları Fonksiyonları =====
+
+function toggleGitHubSettings() {
+    const content = document.getElementById('github-settings-content');
+    const icon = document.getElementById('github-toggle-icon');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.textContent = '▲';
+        loadGitHubSettingsToUI();
+    } else {
+        content.style.display = 'none';
+        icon.textContent = '▼';
+    }
+}
+
+function loadGitHubSettingsToUI() {
+    const settings = DataFetcher.loadSettings();
+    
+    document.getElementById('github-url-input').value = settings.githubUrl || '';
+    document.getElementById('auto-refresh-checkbox').checked = settings.autoRefresh;
+    document.getElementById('refresh-interval').value = settings.refreshInterval;
+    
+    if (settings.lastFetch) {
+        document.getElementById('last-fetch-info').style.display = 'block';
+        document.getElementById('last-fetch-time').textContent = DataFetcher.getLastFetchTime();
+    }
+}
+
+function saveGitHubSettings() {
+    const url = document.getElementById('github-url-input').value.trim();
+    const autoRefresh = document.getElementById('auto-refresh-checkbox').checked;
+    const interval = parseInt(document.getElementById('refresh-interval').value);
+    
+    if (!url) {
+        Utils.showNotification('Lütfen GitHub URL girin', 'warning');
+        return;
+    }
+    
+    // URL formatını kontrol et
+    if (!url.includes('github') && !url.startsWith('http')) {
+        Utils.showNotification('Geçersiz URL formatı', 'error');
+        return;
+    }
+    
+    DataFetcher.saveSettings(url, autoRefresh, interval);
+    
+    if (autoRefresh) {
+        DataFetcher.startAutoRefresh();
+        Utils.showNotification('✅ Ayarlar kaydedildi ve otomatik yenileme başlatıldı', 'success');
+    } else {
+        DataFetcher.stopAutoRefresh();
+        Utils.showNotification('✅ Ayarlar kaydedildi', 'success');
+    }
+}
+
+async function loadFromGitHub() {
+    try {
+        await DataFetcher.loadFromGitHub();
+        
+        // Son çekme zamanını güncelle
+        document.getElementById('last-fetch-info').style.display = 'block';
+        document.getElementById('last-fetch-time').textContent = DataFetcher.getLastFetchTime();
+        
+    } catch (error) {
+        console.error('GitHub yükleme hatası:', error);
+    }
+}
+
+// ===== Tarih Seçici Fonksiyonları =====
+
+function toggleDateSelector() {
+    const wrapper = document.getElementById('date-selector-wrapper');
+    
+    if (!window.AppState || !window.AppState.processedData) {
+        Utils.showNotification('Önce veri yükleyin', 'warning');
+        return;
+    }
+    
+    if (wrapper.style.display === 'none') {
+        wrapper.style.display = 'block';
+        DateSelector.loadAllData(window.AppState.processedData);
+    } else {
+        wrapper.style.display = 'none';
+    }
+}
+
+// ===== Sayfa Yüklendiğinde =====
+
+// Sayfa yüklendiğinde GitHub ayarlarını kontrol et
+document.addEventListener('DOMContentLoaded', function() {
+    // GitHub ayarlarını yükle
+    const settings = DataFetcher.loadSettings();
+    
+    // Eğer URL varsa ve otomatik yenileme açıksa, başlat
+    if (settings.githubUrl && settings.autoRefresh) {
+        console.log('🔄 Otomatik yenileme aktif');
+        DataFetcher.startAutoRefresh();
+        
+        // İlk yükleme yap
+        setTimeout(() => {
+            loadFromGitHub();
+        }, 2000);
+    }
+});

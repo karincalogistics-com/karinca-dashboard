@@ -19,6 +19,10 @@
     
     <!-- Firebase Auth System -->
     <script src="js/firebaseAuth.js"></script>
+    
+    <!-- Yeni Modüller -->
+    <script src="js/dataFetcher.js"></script>
+    <script src="js/dateSelector.js"></script>
 
 </head>
 <body>
@@ -161,12 +165,69 @@
         <!-- Upload Section -->
         <section class="upload-section" id="upload-section">
             <div class="upload-container">
+                <!-- GitHub URL Ayarları -->
+                <div class="github-settings-card">
+                    <div class="settings-header">
+                        <h3>🔗 GitHub'dan Otomatik Veri Çekme</h3>
+                        <button class="btn btn-sm" onclick="toggleGitHubSettings()">
+                            <span id="github-toggle-icon">▼</span> Ayarlar
+                        </button>
+                    </div>
+                    
+                    <div class="github-settings-content" id="github-settings-content" style="display: none;">
+                        <div class="input-group">
+                            <label for="github-url-input">GitHub Raw URL:</label>
+                            <input 
+                                type="url" 
+                                id="github-url-input" 
+                                class="input-modern" 
+                                placeholder="https://raw.githubusercontent.com/user/repo/main/data.xlsx"
+                            />
+                            <small class="input-hint">
+                                💡 Excel dosyanızı GitHub'a yükleyin ve "Raw" linkini buraya yapıştırın
+                            </small>
+                        </div>
+                        
+                        <div class="settings-row">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="auto-refresh-checkbox" />
+                                <label for="auto-refresh-checkbox">Otomatik yenileme</label>
+                            </div>
+                            
+                            <div class="input-group-inline">
+                                <label for="refresh-interval">Yenileme sıklığı:</label>
+                                <select id="refresh-interval" class="select-modern">
+                                    <option value="1800000">30 dakika</option>
+                                    <option value="3600000" selected>1 saat</option>
+                                    <option value="7200000">2 saat</option>
+                                    <option value="14400000">4 saat</option>
+                                    <option value="28800000">8 saat</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-actions">
+                            <button class="btn btn-primary" onclick="saveGitHubSettings()">
+                                💾 Ayarları Kaydet
+                            </button>
+                            <button class="btn btn-success" onclick="loadFromGitHub()">
+                                📥 Şimdi Çek
+                            </button>
+                        </div>
+                        
+                        <div class="last-fetch-info" id="last-fetch-info" style="display: none;">
+                            <small>Son çekme: <span id="last-fetch-time">-</span></small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Manuel Dosya Yükleme -->
                 <div class="upload-area" id="upload-area">
                     <div class="upload-icon">📁</div>
-                    <h3>Excel Dosyasını Yükleyin</h3>
-                    <p>Personel verilerinizi içeren Excel dosyasını sürükleyip bırakın veya seçin</p>
+                    <h3>Manuel Dosya Yükleme</h3>
+                    <p>Excel dosyasını sürükleyip bırakın veya seçin</p>
                     <div class="upload-hint">
-                        <small>💡 Dosyayı güncelledikten sonra buraya tekrar sürükleyebilirsiniz</small>
+                        <small>💡 GitHub ayarı yaparsanız otomatik çekilir</small>
                     </div>
                     <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display: none;">
                     <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
@@ -192,11 +253,20 @@
                         <span class="info-icon">ℹ️</span>
                         <span class="info-text">Performans Hesaplama</span>
                     </button>
+                    <button class="info-btn" onclick="toggleDateSelector()" title="Tarih Seçici">
+                        <span class="info-icon">📅</span>
+                        <span class="info-text">Tarih Seçici</span>
+                    </button>
                 </div>
                 <div class="header-content-center">
                     <h1>Performans Dashboard</h1>
                     <p class="dashboard-subtitle">KPI kartlarına tıklayarak detaylı bilgileri görüntüleyebilirsiniz</p>
                 </div>
+            </div>
+            
+            <!-- Tarih Seçici Container -->
+            <div class="date-selector-wrapper" id="date-selector-wrapper" style="display: none;">
+                <div id="date-selector-container"></div>
             </div>
 
             <!-- KPI Cards -->
