@@ -1654,14 +1654,17 @@ function toggleDebug() {
 function toggleGitHubSettings() {
     const content = document.getElementById('github-settings-content');
     const icon = document.getElementById('github-toggle-icon');
+    const text = document.getElementById('github-toggle-text');
     
     if (content.style.display === 'none') {
         content.style.display = 'block';
         icon.textContent = '▲';
+        text.textContent = 'Kapat';
         loadGitHubSettingsToUI();
     } else {
         content.style.display = 'none';
         icon.textContent = '▼';
+        text.textContent = 'Ayarlar';
     }
 }
 
