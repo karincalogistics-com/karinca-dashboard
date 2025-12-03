@@ -1757,3 +1757,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 2000);
     }
 });
+
+
+// ===== Ekran Geçişleri =====
+
+function showUploadSection() {
+    const uploadSection = document.getElementById('upload-section');
+    const dashboardContent = document.getElementById('dashboard-content');
+    const dateSelectorWrapper = document.getElementById('date-selector-wrapper');
+    
+    if (uploadSection && dashboardContent) {
+        // Dashboard'u gizle
+        dashboardContent.style.display = 'none';
+        
+        // Tarih seçiciyi gizle
+        if (dateSelectorWrapper) {
+            dateSelectorWrapper.style.display = 'none';
+        }
+        
+        // Upload section'ı göster
+        uploadSection.style.display = 'flex';
+        
+        console.log('✅ Dosya yükleme ekranına dönüldü');
+    }
+}

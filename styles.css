@@ -3843,3 +3843,24 @@ min Panel Styles */
 [data-theme="dark"] .date-table tbody tr.selected {
     background: rgba(59, 130, 246, 0.2);
 }
+
+
+/* Geri Butonu */
+.back-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+    font-weight: 600;
+}
+
+.back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.back-btn .info-icon {
+    font-size: 1.2rem;
+}
+
+.back-btn .info-text {
+    color: white;
+}
