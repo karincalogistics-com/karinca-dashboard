@@ -1810,11 +1810,17 @@ function showUploadSection() {
 // ===== GitHub Tarih Seçici =====
 
 async function toggleGitHubDateSelector() {
+    console.log('🔍 toggleGitHubDateSelector çağrıldı');
+    
     const wrapper = document.getElementById('github-date-selector-wrapper-dashboard');
     const container = document.getElementById('github-date-selector-container-dashboard');
     
+    console.log('📦 Wrapper:', wrapper);
+    console.log('📦 Container:', container);
+    
     if (!wrapper || !container) {
         console.error('❌ GitHub tarih seçici elementleri bulunamadı');
+        alert('Hata: Tarih seçici elementleri bulunamadı. Sayfayı yenileyin.');
         return;
     }
     
@@ -1825,12 +1831,17 @@ async function toggleGitHubDateSelector() {
         
         try {
             console.log('📂 GitHub klasörü taranıyor (Dashboard)...');
+            
+            if (!window.GitHubFolderBrowser) {
+                throw new Error('GitHubFolderBrowser modülü yüklenmedi');
+            }
+            
             const html = await GitHubFolderBrowser.renderDateTable();
             container.innerHTML = html;
             console.log('✅ Dosyalar yüklendi');
         } catch (error) {
             console.error('❌ Hata:', error);
-            container.innerHTML = `<div class="error-message">❌ Hata: ${error.message}</div>`;
+            container.innerHTML = `<div class="error-message">❌ Hata: ${error.message}<br><small>Console'u kontrol edin (F12)</small></div>`;
         }
     } else {
         // Kapat
