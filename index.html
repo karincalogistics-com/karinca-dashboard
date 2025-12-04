@@ -56,7 +56,6 @@
                 
                 <form class="login-form-modern" onsubmit="event.preventDefault(); performLogin();">
                     <div class="input-wrapper">
-                        <div class="input-icon">👤</div>
                         <input 
                             type="email" 
                             id="login-email-input" 
@@ -65,10 +64,10 @@
                             autocomplete="email"
                             required
                         />
+                        <div class="input-icon">👤</div>
                     </div>
                     
                     <div class="input-wrapper">
-                        <div class="input-icon">🔒</div>
                         <input 
                             type="password" 
                             id="login-password-input" 
@@ -77,6 +76,7 @@
                             autocomplete="current-password"
                             required
                         />
+                        <div class="input-icon">🔒</div>
                     </div>
                     
                     <button type="submit" class="btn-modern">
@@ -2569,11 +2569,37 @@
             // File upload'ı başlat
             initializeFileUpload();
             
+            // Login input ikonlarını kontrol et
+            setupLoginInputIcons();
+            
             // Erişim kontrolü
             await checkAccess();
             
             console.log('✅ Dashboard hazır');
         });
+        
+        // Login input ikonlarını yönet
+        function setupLoginInputIcons() {
+            const inputs = document.querySelectorAll('.input-modern');
+            
+            inputs.forEach(input => {
+                const wrapper = input.closest('.input-wrapper');
+                
+                // Input değişikliklerini dinle
+                input.addEventListener('input', function() {
+                    if (this.value.length > 0) {
+                        wrapper.classList.add('has-value');
+                    } else {
+                        wrapper.classList.remove('has-value');
+                    }
+                });
+                
+                // Sayfa yüklendiğinde mevcut değeri kontrol et
+                if (input.value.length > 0) {
+                    wrapper.classList.add('has-value');
+                }
+            });
+        }
 
         // Menü dışına tıklayınca kapat
         document.addEventListener('click', function(e) {

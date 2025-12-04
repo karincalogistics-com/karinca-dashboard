@@ -3264,6 +3264,18 @@ min Panel Styles */
     font-size: 1.25rem;
     opacity: 0.6;
     pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 1;
+}
+
+.input-wrapper:focus-within .input-icon {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.8);
+}
+
+.input-wrapper.has-value .input-icon {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.8);
 }
 
 .input-modern {
