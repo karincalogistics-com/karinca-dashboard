@@ -1805,3 +1805,32 @@ function showUploadSection() {
         console.log('✅ Dosya yükleme ekranına dönüldü');
     }
 }
+
+
+// ===== GitHub Tarih Seçici =====
+
+async function toggleGitHubDateSelector() {
+    const wrapper = document.getElementById('github-date-selector-wrapper');
+    const container = document.getElementById('github-date-selector-container');
+    
+    if (!wrapper || !container) {
+        console.error('❌ GitHub tarih seçici elementleri bulunamadı');
+        return;
+    }
+    
+    if (wrapper.style.display === 'none') {
+        // Aç
+        wrapper.style.display = 'block';
+        container.innerHTML = '<div class="loading">🔄 GitHub dosyaları yükleniyor...</div>';
+        
+        try {
+            const html = await GitHubFolderBrowser.renderDateTable();
+            container.innerHTML = html;
+        } catch (error) {
+            container.innerHTML = `<div class="error-message">❌ Hata: ${error.message}</div>`;
+        }
+    } else {
+        // Kapat
+        wrapper.style.display = 'none';
+    }
+}

@@ -3864,3 +3864,42 @@ min Panel Styles */
 .back-btn .info-text {
     color: white;
 }
+
+
+/* GitHub Tarih Seçici */
+.github-date-selector {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.no-files {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+.error-message {
+    text-align: center;
+    padding: 40px;
+    color: #dc3545;
+    font-size: 1.1rem;
+}
+
+/* Tarih satırı hover */
+.date-row:hover {
+    background: var(--bg-secondary);
+    cursor: pointer;
+}
+
+.date-row td {
+    vertical-align: middle;
+}
