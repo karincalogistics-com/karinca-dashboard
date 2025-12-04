@@ -3258,11 +3258,11 @@ min Panel Styles */
 
 .input-icon {
     position: absolute;
-    left: 1.25rem;
+    left: -2.5rem;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 1.25rem;
-    opacity: 0.6;
+    font-size: 1.5rem;
+    opacity: 0.7;
     pointer-events: none;
     transition: opacity 0.3s ease, transform 0.3s ease;
     z-index: 1;
@@ -3280,7 +3280,7 @@ min Panel Styles */
 
 .input-modern {
     width: 100%;
-    padding: 1rem 1rem 1rem 3.5rem;
+    padding: 1rem 1.5rem;
     font-size: 0.95rem;
     border: 2px solid rgba(102, 126, 234, 0.2);
     border-radius: 50px;
@@ -3288,7 +3288,6 @@ min Panel Styles */
     color: #1e293b;
     transition: all 0.3s ease;
     font-family: inherit;
-    text-align: left;
 }
 
 .input-modern:focus {
@@ -3296,20 +3295,10 @@ min Panel Styles */
     border-color: #667eea;
     background: white;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-    text-align: center;
-    padding-left: 1rem;
-    padding-right: 1rem;
-}
-
-.input-wrapper.has-value .input-modern {
-    text-align: center;
-    padding-left: 1rem;
-    padding-right: 1rem;
 }
 
 .input-modern::placeholder {
     color: #94a3b8;
-    text-align: left;
 }
 
 .btn-modern {
