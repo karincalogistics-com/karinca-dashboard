@@ -4046,7 +4046,7 @@ min Panel Styles */
 /* Modern Sidebar Butonlar */
 .header-sidebar {
     position: fixed;
-    top: 85px;
+    top: 140px;
     left: 20px;
     display: flex;
     flex-direction: column;
@@ -4143,7 +4143,7 @@ min Panel Styles */
     }
     
     .header-sidebar {
-        top: 75px;
+        top: 120px;
         left: 15px;
         gap: 10px;
     }
