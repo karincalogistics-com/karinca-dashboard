@@ -1839,15 +1839,30 @@ async function toggleGitHubDateSelector() {
 // ===== Upload Ekranında Tarih Seçici =====
 
 async function toggleGitHubDateSelectorUpload() {
-    // Önce dashboard'u göster
-    const uploadSection = document.getElementById('upload-section');
-    const dashboardContent = document.getElementById('dashboard-content');
+    const wrapper = document.getElementById('github-date-selector-wrapper');
+    const container = document.getElementById('github-date-selector-container');
     
-    if (uploadSection && dashboardContent) {
-        uploadSection.style.display = 'none';
-        dashboardContent.style.display = 'block';
+    if (!wrapper || !container) {
+        console.error('❌ GitHub tarih seçici elementleri bulunamadı');
+        return;
     }
     
-    // Sonra tarih seçiciyi aç
-    await toggleGitHubDateSelector();
+    if (wrapper.style.display === 'none' || wrapper.style.display === '') {
+        // Aç
+        wrapper.style.display = 'block';
+        container.innerHTML = '<div class="loading">🔄 GitHub dosyaları yükleniyor...</div>';
+        
+        try {
+            console.log('📂 GitHub klasörü taranıyor...');
+            const html = await GitHubFolderBrowser.renderDateTable();
+            container.innerHTML = html;
+            console.log('✅ Dosyalar yüklendi');
+        } catch (error) {
+            console.error('❌ Hata:', error);
+            container.innerHTML = `<div class="error-message">❌ Hata: ${error.message}</div>`;
+        }
+    } else {
+        // Kapat
+        wrapper.style.display = 'none';
+    }
 }

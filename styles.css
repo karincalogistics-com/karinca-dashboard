@@ -4045,7 +4045,7 @@ min Panel Styles */
 /* Upload Ekranı Sidebar */
 .upload-sidebar {
     position: fixed;
-    top: 20px;
+    top: 100px;
     left: 20px;
     z-index: 999;
 }
