@@ -45,9 +45,8 @@ REM Kopyala
 echo [1/4] Kopyalaniyor...
 copy "%EXCEL_FILE%" "%TARGET%" >nul
 
-REM Git GUI'yi ac
-echo [2/4] Git GUI aciliyor...
-start "" "C:\Program Files\Git\cmd\git-gui.exe"
+REM Git GUI'yi ac (opsiyonel)
+echo [2/4] Dosya hazir...
 
 echo.
 echo ========================================
