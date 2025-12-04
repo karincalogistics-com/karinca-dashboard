@@ -263,24 +263,32 @@
         <div class="dashboard-content" id="dashboard-content" style="display: none;">
             <!-- Dashboard Header -->
             <div class="dashboard-header">
-                <div class="header-info">
-                    <button class="info-btn back-btn" onclick="showUploadSection()" title="Dosya Yükleme Ekranına Dön">
-                        <span class="info-icon">⬅️</span>
-                        <span class="info-text">Geri</span>
-                    </button>
-                    <button class="info-btn" onclick="showPerformanceInfo()" title="Performans Hesaplama Bilgisi">
-                        <span class="info-icon">ℹ️</span>
-                        <span class="info-text">Performans Hesaplama</span>
-                    </button>
-                    <button class="info-btn" onclick="toggleDateSelector()" title="Tarih Seçici">
-                        <span class="info-icon">📅</span>
-                        <span class="info-text">Tarih Seçici</span>
-                    </button>
-                    <button class="info-btn" onclick="toggleGitHubDateSelector()" title="GitHub Tarih Seçici">
-                        <span class="info-icon">📂</span>
-                        <span class="info-text">GitHub Tarihleri</span>
+                <!-- Sol Üst Köşe - Geri Butonu -->
+                <div class="header-back-button">
+                    <button class="back-btn-fixed" onclick="showUploadSection()" title="Dosya Yükleme Ekranına Dön">
+                        <span class="back-icon">⬅️</span>
+                        <span class="back-text">Geri</span>
                     </button>
                 </div>
+                
+                <!-- Sol Kenar - Dikey Butonlar -->
+                <div class="header-sidebar">
+                    <button class="sidebar-btn" onclick="showPerformanceInfo()" title="Performans Hesaplama">
+                        <span class="sidebar-icon">ℹ️</span>
+                        <span class="sidebar-text">Performans Hesaplama</span>
+                    </button>
+                    
+                    <button class="sidebar-btn" onclick="toggleDateSelector()" title="Tarih Seç">
+                        <span class="sidebar-icon">📅</span>
+                        <span class="sidebar-text">Tarih Seç</span>
+                    </button>
+                    
+                    <button class="sidebar-btn" onclick="toggleGitHubDateSelector()" title="Tarih Seç">
+                        <span class="sidebar-icon">📂</span>
+                        <span class="sidebar-text">Tarih Seç</span>
+                    </button>
+                </div>
+                
                 <div class="header-content-center">
                     <h1>Performans Dashboard</h1>
                     <p class="dashboard-subtitle">KPI kartlarına tıklayarak detaylı bilgileri görüntüleyebilirsiniz</p>
