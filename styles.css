@@ -3288,6 +3288,7 @@ min Panel Styles */
     color: #1e293b;
     transition: all 0.3s ease;
     font-family: inherit;
+    text-align: left;
 }
 
 .input-modern:focus {
@@ -3295,10 +3296,20 @@ min Panel Styles */
     border-color: #667eea;
     background: white;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    text-align: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.input-wrapper.has-value .input-modern {
+    text-align: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
 
 .input-modern::placeholder {
     color: #94a3b8;
+    text-align: left;
 }
 
 .btn-modern {
